@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { APP_SUPABASE_KEY, APP_SUPABASE_URL } from './app.config';
-import { from } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 @Component({
   selector: 'app-root',
@@ -13,11 +10,4 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 })
 export class AppComponent {
   title = 'racing-app';
-
-  constructor() {
-    const supabase: SupabaseClient = createClient(APP_SUPABASE_URL, APP_SUPABASE_KEY);
-    from(supabase.from('races').select().returns<object>()).subscribe((value: unknown) => {
-      console.log('races', value)
-    })
-  }
 }

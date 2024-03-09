@@ -13,3 +13,4 @@ export const appConfig: ApplicationConfig = {
 
 export const APP_SUPABASE_URL: string = 'https://xaduoizfbpolquwpmpbk.supabase.co';
 export const APP_SUPABASE_KEY: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhZHVvaXpmYnBvbHF1d3BtcGJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NzIyMjYsImV4cCI6MjAyNTI0ODIyNn0.RCKq4ycB4lCMwzjz6PvuONImyply89k3e9PwNlymQBI';
+export const APP_FACEBOOK_APP_ID: string = '1726453531174858';
