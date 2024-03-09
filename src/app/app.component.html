@@ -1,6 +1,8 @@
-<p-button label="Submit"></p-button>
-<div class="flex">
-  <div class="flex-1 h-4rem bg-primary font-bold text-center p-4 border-round">1</div>
-  <div class="flex-1 h-4rem bg-primary font-bold text-center p-4 border-round mx-4">2</div>
-  <div class="flex-1 h-4rem bg-primary font-bold text-center p-4 border-round">3</div>
+<div class="grid">
+  <div class="col-fixed" style="width: 250px">
+    <app-sidebar></app-sidebar>
+  </div>
+  <div class="col">
+      <router-outlet></router-outlet>
+  </div>
 </div>

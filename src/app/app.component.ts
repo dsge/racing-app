@@ -3,12 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { APP_SUPABASE_KEY, APP_SUPABASE_URL } from './app.config';
 import { from } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
-
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ButtonModule],
+  imports: [RouterOutlet, SidebarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
