@@ -1,10 +1,14 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
+  providers: [
+    provideRouter(routes),
+    provideAnimations()
+  ]
 };
 
 export const APP_SUPABASE_URL: string = 'https://xaduoizfbpolquwpmpbk.supabase.co';
