@@ -31,11 +31,17 @@
             "style": "kebab-case"
           }
         ],
-        "@typescript-eslint/no-inferrable-types": 0,
         "@typescript-eslint/typedef": [
-            "warn",
+            "error",
             {
-                "variableDeclaration": true
+              "arrayDestructuring": false,
+              "arrowParameter": false,
+              "memberVariableDeclaration": false,
+              "objectDestructuring": false,
+              "parameter": false,
+              "propertyDeclaration": false,
+              "variableDeclaration": false,
+              "variableDeclarationIgnoreFunction": false
             }
         ],
         "@typescript-eslint/member-ordering": "error"
