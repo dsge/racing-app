@@ -14,6 +14,9 @@ export class SidebarComponent {
     {
       label: 'Landing Page',
       routerLink: '/'
+    },{
+      label: 'Login Page',
+      routerLink: '/login'
     },
     {
       label: 'Races List Page',
