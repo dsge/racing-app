@@ -1,3 +1,10 @@
-<ng-container *ngIf="items$ | async as items">
-  <p-menu [model]="items"></p-menu>
-</ng-container>
+<div class="grid">
+  <div class="col-12">
+    <a href="/" class="logo"><span></span></a>
+  </div>
+  <div class="col-12">
+    <ng-container *ngIf="items$ | async as items">
+      <p-menu [model]="items"></p-menu>
+    </ng-container>
+  </div>
+</div>

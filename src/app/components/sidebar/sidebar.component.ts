@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, PrimeIcons } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { Observable, map, take } from 'rxjs';
 import { User } from '@supabase/supabase-js';
@@ -31,26 +31,35 @@ export class SidebarComponent {
         return [
           {
             label: 'Landing Page',
-            routerLink: '/',
+            routerLink: ['/'],
+            routerLinkActiveOptions: { exact: true },
+            icon: PrimeIcons.HOME
           },{
             label: 'Login Page',
-            routerLink: '/login',
+            routerLink: ['/', '/login'],
+            routerLinkActiveOptions: { exact: true },
+            icon: PrimeIcons.SIGN_IN,
             visible: !isLoggedIn
           },
           {
             label: 'Races List Page',
-            routerLink: '/races',
+            routerLink: ['/', 'races'],
+            routerLinkActiveOptions: { exact: true },
             visible: true,
+            icon: PrimeIcons.CAR,
             disabled: !isLoggedIn
           },
           {
             label: 'Drivers List Page',
-            routerLink: '/drivers',
+            routerLink: ['/', 'drivers'],
+            routerLinkActiveOptions: { exact: true },
+            icon: PrimeIcons.USERS,
             visible: true,
             disabled: !isLoggedIn
           },
           {
             label: 'Logout',
+            icon: PrimeIcons.SIGN_OUT,
             command: () => {
               this.onLogoutPressed();
             },
