@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
-import { AuthError } from '@supabase/supabase-js';
+import { AuthError, AuthTokenResponsePassword } from '@supabase/supabase-js';
 import { finalize, take } from 'rxjs';
-import { ApiService } from '../../services/api.service';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-login-page',
@@ -25,13 +25,13 @@ export class LoginPageComponent {
     };
   public loading: boolean = false;
 
-  protected apiService: ApiService = inject(ApiService);
+  protected userService: UserService = inject(UserService);
   protected changeDetector: ChangeDetectorRef = inject(ChangeDetectorRef);
   protected router: Router = inject(Router);
 
   public loginWithEmail(): void {
     this.loading = true;
-    this.apiService.signInWithPassword({
+    this.userService.signInWithPassword({
       email: this.inputs.email,
       password: this.inputs.password,
     }).pipe(
@@ -40,13 +40,18 @@ export class LoginPageComponent {
         this.loading = false;
         this.changeDetector.markForCheck();
       })
-    ).subscribe(() => {
-      this.router.navigate(['/races']);
+    ).subscribe((result: AuthTokenResponsePassword) => {
+      if (!result.error) {
+        // successful login
+        this.router.navigate(['/races']);
+      } else {
+        // failed login
+      }
     })
   }
 
   public signOut(): void {
-    this.apiService.signOut()
+    this.userService.signOut()
       .pipe(take(1)).subscribe((results: {
         error: AuthError | null;
       }) => {
