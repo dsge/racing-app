@@ -34,14 +34,14 @@
         "@typescript-eslint/typedef": [
             "error",
             {
-              "arrayDestructuring": false,
-              "arrowParameter": false,
-              "memberVariableDeclaration": false,
-              "objectDestructuring": false,
-              "parameter": false,
-              "propertyDeclaration": false,
-              "variableDeclaration": false,
-              "variableDeclarationIgnoreFunction": false
+              "arrayDestructuring": true,
+              "arrowParameter": true,
+              "memberVariableDeclaration": true,
+              "objectDestructuring": true,
+              "parameter": true,
+              "propertyDeclaration": true,
+              "variableDeclaration": true,
+              "variableDeclarationIgnoreFunction": true
             }
         ],
         "@typescript-eslint/member-ordering": "error"
