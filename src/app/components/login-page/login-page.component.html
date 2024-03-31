@@ -1,2 +1,44 @@
-<p>login-page works!</p>
-<button (click)="loginWithEmail()" (keyup)="loginWithEmail()">Login</button>
+<div class="grid">
+  <div class="col-offset-4 col-4">
+
+    <p-card header="Login">
+
+      <form #form="ngForm">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="inputs.email"
+            required
+            email
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="inputs.password"
+            required
+            minlength="6"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full">
+        </div>
+
+        <p-button
+          type="submit"
+          label="Login"
+          severity="primary"
+          (click)="loginWithEmail()"
+          (keyup)="loginWithEmail()"
+          [disabled]="!!form.invalid"
+          [loading]="loading"
+        ></p-button>
+      </form>
+
+    </p-card>
+  </div>
+</div>

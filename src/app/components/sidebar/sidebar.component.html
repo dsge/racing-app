@@ -1,1 +1,3 @@
-<p-menu [model]="items"></p-menu>
+<ng-container *ngIf="items$ | async as items">
+  <p-menu [model]="items"></p-menu>
+</ng-container>

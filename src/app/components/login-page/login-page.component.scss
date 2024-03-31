@@ -1,0 +1,33 @@
+
+:host {
+  display: block;
+  width: 100%;
+  margin-top: 30vh;
+  @media(max-width: 1023px) {
+    margin-top: 0;
+  }
+
+  & ::ng-deep .p-card-content {
+    padding-bottom: 0;
+  }
+}
+
+p-button {
+  margin-top: 25px;
+  text-align: center;
+
+  & ::ng-deep > button {
+    display: block;
+    width: 100%;
+  }
+}
+
+input {
+  transition: all 250ms ease;
+}
+
+.ng-invalid:not(form):not(.ng-pristine) {
+  $red: #a94442;
+  outline: 5px solid $red !important;
+  border-color: $red !important;
+}
