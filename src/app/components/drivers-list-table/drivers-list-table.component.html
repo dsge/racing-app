@@ -16,8 +16,8 @@
               <td>{{ driver.year_of_racing }}</td>
               <td>{{ driver.freetext_notes }}</td>
               <td style="text-align: right;">
-                <p-button label="Edit" severity="primary"></p-button>&nbsp;
-                <p-button (click)="confirm2($event)" label="Delete" severity="danger"></p-button>
+                <p-button (click)="onEditDriverClick(driver)" label="Edit" severity="primary"></p-button>&nbsp;
+                <p-button (click)="onDeleteDriverButtonClick($event, driver)" label="Delete" severity="danger"></p-button>
               </td>
           </tr>
       </ng-template>
@@ -30,7 +30,7 @@
 
     <div class="grid">
       <div class="col-offset-4 col-4">
-        <p-button label="Add new Driver" severity="primary" class="add-new-button"></p-button>
+        <p-button label="Add new Driver" (click)="onNewDriverButtonClick()" severity="primary" class="add-new-button"></p-button>
       </div>
     </div>
 

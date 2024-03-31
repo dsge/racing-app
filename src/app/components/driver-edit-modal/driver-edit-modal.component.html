@@ -1,0 +1,38 @@
+<div class="grid" *ngIf="data && data.year && data.model">
+  <div class="col-12">
+
+      <form #form="ngForm">
+        <div class="field">
+          <label for="full_name">Full Name</label>
+          <input
+            id="full_name"
+            type="text"
+            name="full_name"
+            [(ngModel)]="data.model.full_name"
+            required
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full">
+        </div>
+
+        <div class="field">
+          <label for="freetext_notes">Freetext Notes</label>
+          <textarea
+            id="freetext_notes"
+            type="freetext_notes"
+            name="freetext_notes"
+            [(ngModel)]="data.model.freetext_notes"
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full">
+          </textarea>
+        </div>
+
+        <p-button
+          type="submit"
+          [label]="isNewModel ? 'Add new driver' : 'Update driver'"
+          severity="primary"
+          [disabled]="!!form.invalid"
+          (click)="onSubmit()"
+          [loading]="loading"
+        ></p-button>
+      </form>
+
+  </div>
+</div>
