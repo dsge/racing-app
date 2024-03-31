@@ -1,1 +1,5 @@
-<p>drivers-list-page works!</p>
+<p-tabView>
+  <p-tabPanel *ngFor="let tab of tabs" [header]="tab.title">
+    <app-drivers-list-table [year]="tab.year"></app-drivers-list-table>
+  </p-tabPanel>
+</p-tabView>
