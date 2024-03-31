@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { DriverService } from '../../services/driver.service';
 
 @Component({
   selector: 'app-drivers-list-page',
@@ -9,4 +10,9 @@ import { Component } from '@angular/core';
 })
 export class DriversListPageComponent {
 
+  protected driverService: DriverService = inject(DriverService);
+
+  constructor() {
+    console.log('years', this.driverService.getYears());
+  }
 }
