@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS "public"."races" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "drivers_from_year" integer,
     "race_start_date" date NOT NULL,
-    "race_end_date" date NOT NULL
+    "race_end_date" date NOT NULL,
+    "voting_end_time" timestamp with time zone
 );
 
 ALTER TABLE "public"."races" OWNER TO "postgres";

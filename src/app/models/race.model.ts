@@ -7,4 +7,5 @@ export interface Race {
   drivers_from_year: number;
   race_start_date: string;
   race_end_date: string;
+  voting_end_time?: string;
 }
