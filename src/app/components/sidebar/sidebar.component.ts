@@ -36,7 +36,7 @@ export class SidebarComponent {
             icon: PrimeIcons.HOME
           },{
             label: 'Login Page',
-            routerLink: ['/', '/login'],
+            routerLink: ['/', 'login'],
             routerLinkActiveOptions: { exact: true },
             icon: PrimeIcons.SIGN_IN,
             visible: !isLoggedIn
