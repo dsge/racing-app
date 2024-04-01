@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MenuItem, PrimeIcons } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
-import { Observable, map, take } from 'rxjs';
+import { Observable, combineLatest, map, of, switchMap, take } from 'rxjs';
 import { User } from '@supabase/supabase-js';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -27,7 +27,8 @@ export class SidebarComponent {
   protected createMenuItems(): Observable<MenuItem[]> {
     return this.userService.getUser().pipe(
       map((user: User | null) => !!user),
-      map((isLoggedIn: boolean) => {
+      switchMap((isLoggedIn: boolean) => combineLatest([of(isLoggedIn), this.userService.isModerator()])),
+      map(([isLoggedIn, isModerator]: [boolean, boolean]) => {
         return [
           {
             label: 'Landing Page',
@@ -55,7 +56,7 @@ export class SidebarComponent {
             routerLinkActiveOptions: { exact: true },
             icon: PrimeIcons.USERS,
             visible: true,
-            disabled: !isLoggedIn
+            disabled: !isModerator
           },
           {
             label: 'Logout',
