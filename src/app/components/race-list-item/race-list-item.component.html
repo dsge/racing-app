@@ -7,13 +7,21 @@
           <div class="p-card-subtitle ng-star-inserted"> {{ model.race_start_date | date }} - {{ model.race_end_date | date }} </div>
         </div>
         <div class="col-3">
-          <p-button label="Edit" icon="pi pi-pencil" styleClass="p-button-secondary" [disabled]="!(currentUserIsModerator() | async)!"></p-button>
+          <p-button
+            label="Edit"
+            icon="pi pi-pencil"
+            styleClass="p-button-secondary"
+            [disabled]="!(currentUserIsModerator() | async)!"
+            (click)="onEditRaceClick(model)"
+          ></p-button>
         </div>
       </div>
     </ng-template>
     <p>
-        Voting ends at:
-        <span [attr.title]="getVotingEndTime(model) | date: 'full'">{{ getVotingEndTime(model) | date: 'medium' }}</span>
+
+        <ng-container *ngIf="!votingEnded">Voting ends </ng-container>
+        <ng-container *ngIf="votingEnded">Voting ended </ng-container>
+        <span [attr.title]="getVotingEndTime(model) | json">{{ formatDistance(getVotingEndTime(model)) }}</span>
     </p>
     <ng-template pTemplate="footer">
       <div class="grid">

@@ -1,0 +1,83 @@
+<div class="grid" *ngIf="data && data.model">
+  <div class="col-12">
+
+      <form #form="ngForm" (ngSubmit)="onSubmit()">
+        <div class="field">
+          <label for="race_name">Race Name</label>
+          <input
+            id="race_name"
+            type="text"
+            name="race_name"
+            [(ngModel)]="data.model.race_name"
+            maxlength="128"
+            required
+            class="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full">
+        </div>
+
+        <div class="field">
+          <label for="drivers_from_year">Uses Drivers from this year</label>
+          <p-dropdown
+            id="drivers_from_year"
+            name="drivers_from_year"
+            [options]="yearOptions"
+            [(ngModel)]="data.model.drivers_from_year"
+            [showClear]="false"
+            placeholder="Select a year"
+            [required]="true"
+            appendTo="body"
+            [style]="{'width':'100%'}"
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label for="race_start_date">Race Start Date</label>
+          <p-calendar
+            id="race_start_date"
+            name="race_start_date"
+            [(ngModel)]="data.model.race_start_date"
+            [style]="{'width':'100%'}"
+            placeholder="Select a date"
+            appendTo="body"
+            [required]="true"
+          ></p-calendar>
+        </div>
+
+        <div class="field">
+          <label for="race_end_date">Race End Date</label>
+          <p-calendar
+            id="race_end_date"
+            name="race_end_date"
+            [(ngModel)]="data.model.race_end_date"
+            [style]="{'width':'100%'}"
+            placeholder="Select a date"
+            appendTo="body"
+            [required]="true"
+          ></p-calendar>
+        </div>
+
+        <div class="field">
+          <label for="voting_end_time">Voting End Time</label>
+          <p-calendar
+            id="voting_end_time"
+            name="voting_end_time"
+            [(ngModel)]="data.model.voting_end_time"
+            [showTime]="true"
+            [style]="{'width':'100%'}"
+            placeholder="Select a time"
+            appendTo="body"
+            [required]="true"
+          ></p-calendar>
+        </div>
+
+
+        <p-button
+          type="submit"
+          [label]="isNewModel ? 'Add new Race' : 'Update Race'"
+          severity="primary"
+          [disabled]="!!form.invalid"
+          [loading]="loading"
+        ></p-button>
+      </form>
+
+  </div>
+</div>
