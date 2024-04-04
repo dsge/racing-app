@@ -66,9 +66,8 @@ export class RaceListPageComponent {
     {
       race_name: 'Dolor Ipsum',
       drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-03-04 10:10:13'
+      race_end_date: '2024-02-07',
+      race_start_date: '2024-02-06',
     },
     {
       race_name: 'Dolor Ipsum',
