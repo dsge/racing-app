@@ -6,6 +6,8 @@ import { ButtonModule } from 'primeng/button';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DriverService } from '../../services/driver.service';
 import { Observable, finalize, take, tap } from 'rxjs';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-driver-edit-modal',
@@ -24,6 +26,7 @@ export class DriverEditModalComponent implements OnInit {
   };
   protected driverService: DriverService = inject(DriverService);
   protected dialogRef: DynamicDialogRef = inject(DynamicDialogRef);
+  protected toastService: ToastService = inject(ToastService);
 
   constructor(dialogService: DialogService) {
     this.data = {...(dialogService.getInstance(this.dialogRef).data)};
@@ -42,7 +45,7 @@ export class DriverEditModalComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    let observable: Observable<unknown>;
+    let observable: Observable<PostgrestSingleResponse<null>>;
     if (this.isNewModel) {
       observable = this.driverService.createDriver(this.data.model!)
     } else {
@@ -52,8 +55,16 @@ export class DriverEditModalComponent implements OnInit {
       take(1),
       tap(() => { this.loading = true; }),
       finalize(() => { this.loading = false; })
-    ).subscribe(() => {
-      this.dialogRef.close({ success: true })
+    ).subscribe((res: PostgrestSingleResponse<null>) => {
+      if (res.error) {
+        this.toastService.add({
+          severity: 'error',
+          summary: 'Save failed',
+          detail: `Reason: ${res.error.message || 'Unknown'}`
+        });
+      } else {
+        this.dialogRef.close({ success: true })
+      }
     });
   }
 }

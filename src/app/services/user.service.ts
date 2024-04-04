@@ -12,7 +12,6 @@ export class UserService {
   protected readonly isModerator$: Observable<boolean>;
   protected readonly apiService: ApiService = inject(ApiService);
 
-
   constructor() {
     this.supabaseAuthStateChange$ = this.createSupabaseAuthChangeEventSubject();
     this.isModerator$ = this.createIsModeratorObservable();

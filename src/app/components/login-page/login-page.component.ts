@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-login-page',
@@ -28,6 +29,7 @@ export class LoginPageComponent {
   protected userService: UserService = inject(UserService);
   protected changeDetector: ChangeDetectorRef = inject(ChangeDetectorRef);
   protected router: Router = inject(Router);
+  protected toastService: ToastService = inject(ToastService);
 
   public loginWithEmail(): void {
     this.loading = true;
@@ -46,6 +48,11 @@ export class LoginPageComponent {
         this.router.navigate(['/races']);
       } else {
         // failed login
+        this.toastService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Login Failed'
+        });
       }
     })
   }
