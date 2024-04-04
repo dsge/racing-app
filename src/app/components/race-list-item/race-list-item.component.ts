@@ -5,6 +5,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { Observable } from 'rxjs';
 import { UserService } from '../../services/user.service';
+import { RaceService } from '../../services/race.service';
 
 
 @Component({
@@ -21,8 +22,13 @@ export class RaceListItemComponent {
   @Input() public votingEnded: boolean | null = true;
 
   protected userService: UserService = inject(UserService);
+  protected raceService: RaceService = inject(RaceService);
 
   public currentUserIsModerator(): Observable<boolean> {
     return this.userService.isModerator();
+  }
+
+  public getVotingEndTime(race: Race): Date {
+    return this.raceService.getVotingEndTime(race);
   }
 }

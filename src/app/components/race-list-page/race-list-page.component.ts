@@ -3,9 +3,9 @@ import { RaceListItemComponent } from '../race-list-item/race-list-item.componen
 import { CommonModule } from '@angular/common';
 import { Race } from '../../models/race.model';
 import { Observable, map, of } from 'rxjs';
-import { isBefore } from 'date-fns';
 import { ButtonModule } from 'primeng/button';
 import { UserService } from '../../services/user.service';
+import { RaceService } from '../../services/race.service';
 
 @Component({
   selector: 'app-race-list-page',
@@ -79,13 +79,14 @@ export class RaceListPageComponent {
   ]);
 
   protected userService: UserService = inject(UserService);
+  protected raceService: RaceService = inject(RaceService);
 
   constructor() {
     this.currentRaceModels$ = this.models$.pipe(
-      map((models: Race[]) => models.filter((model: Race) => !this.calculateHasVotingEnded(model)))
+      map((models: Race[]) => models.filter((model: Race) => !this.raceService.hasVotingEnded(model)))
     )
     this.olderRaceModels$ = this.models$.pipe(
-      map((models: Race[]) => models.filter((model: Race) => this.calculateHasVotingEnded(model)))
+      map((models: Race[]) => models.filter((model: Race) => this.raceService.hasVotingEnded(model)))
     )
   }
 
@@ -98,19 +99,11 @@ export class RaceListPageComponent {
     this.showOlderRaces = !this.showOlderRaces;
   }
 
-  public hasVotingEnded(race: Race): Observable<boolean> {
-    return of(this.calculateHasVotingEnded(race));
+  public hasVotingEnded(race: Race): boolean {
+    return this.raceService.hasVotingEnded(race);
   }
 
   public hasUserVoted(race: Race): Observable<boolean> {
-    return of(this.calculateHasUserVoted(race));
-  }
-
-  protected calculateHasUserVoted(race: Race): boolean {
-    return Math.round((Math.random() * 1000)) % 2 == 0;
-  }
-
-  protected calculateHasVotingEnded(race: Race): boolean {
-    return isBefore(new Date(race.voting_end_time || race.race_start_date), new Date());
+    return this.raceService.hasUserVoted(race);
   }
 }

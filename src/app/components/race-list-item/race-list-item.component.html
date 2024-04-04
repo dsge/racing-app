@@ -13,9 +13,7 @@
     </ng-template>
     <p>
         Voting ends at:
-        <span [attr.title]="(model.voting_end_time || model.race_start_date) | date: 'full'">
-          {{ (model.voting_end_time || model.race_start_date) | date: 'medium' }}
-        </span>
+        <span [attr.title]="getVotingEndTime(model) | date: 'full'">{{ getVotingEndTime(model) | date: 'medium' }}</span>
     </p>
     <ng-template pTemplate="footer">
       <div class="grid">
