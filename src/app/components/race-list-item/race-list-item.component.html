@@ -7,7 +7,7 @@
           <div class="p-card-subtitle ng-star-inserted"> {{ model.race_start_date | date }} - {{ model.race_end_date | date }} </div>
         </div>
         <div class="col-3">
-          <p-button label="Edit" icon="pi pi-pencil" styleClass="p-button-secondary"></p-button>
+          <p-button label="Edit" icon="pi pi-pencil" styleClass="p-button-secondary" [disabled]="!(currentUserIsModerator() | async)!"></p-button>
         </div>
       </div>
     </ng-template>

@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { Race } from '../../models/race.model';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { Observable } from 'rxjs';
+import { UserService } from '../../services/user.service';
 
 
 @Component({
@@ -17,4 +19,10 @@ export class RaceListItemComponent {
   @Input() public model: Race | null = null;
   @Input() public currentUserVoted: boolean | null = false;
   @Input() public votingEnded: boolean | null = true;
+
+  protected userService: UserService = inject(UserService);
+
+  public currentUserIsModerator(): Observable<boolean> {
+    return this.userService.isModerator();
+  }
 }

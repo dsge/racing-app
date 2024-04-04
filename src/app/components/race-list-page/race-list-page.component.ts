@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RaceListItemComponent } from '../race-list-item/race-list-item.component';
 import { CommonModule } from '@angular/common';
 import { Race } from '../../models/race.model';
 import { Observable, map, of } from 'rxjs';
 import { isBefore } from 'date-fns';
+import { ButtonModule } from 'primeng/button';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-race-list-page',
   standalone: true,
-  imports: [RaceListItemComponent, CommonModule],
+  imports: [RaceListItemComponent, CommonModule, ButtonModule],
   templateUrl: './race-list-page.component.html',
   styleUrl: './race-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -77,6 +79,8 @@ export class RaceListPageComponent {
     }
   ]);
 
+  protected userService: UserService = inject(UserService);
+
   constructor() {
     this.currentRaceModels$ = this.models$.pipe(
       map((models: Race[]) => models.filter((model: Race) => !this.calculateHasVotingEnded(model)))
@@ -84,6 +88,10 @@ export class RaceListPageComponent {
     this.olderRaceModels$ = this.models$.pipe(
       map((models: Race[]) => models.filter((model: Race) => this.calculateHasVotingEnded(model)))
     )
+  }
+
+  public currentUserIsModerator(): Observable<boolean> {
+    return this.userService.isModerator();
   }
 
   public toggleShowOlderRaces(event: Event): void {

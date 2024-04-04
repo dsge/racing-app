@@ -1,3 +1,10 @@
 h1 a {
   font-size: 1rem;
 }
+
+:host ::ng-deep {
+  button {
+    display: block;
+    width: 100%;
+  }
+}

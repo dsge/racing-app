@@ -6,6 +6,11 @@
     </ng-container>
   </div>
 </div>
+<div class="grid">
+  <div class="col-offset-5 col-2">
+    <p-button label="Add new Race" icon="pi pi-plus" styleClass="p-button-secondary" [disabled]="!(currentUserIsModerator() | async)!"></p-button>
+  </div>
+</div>
 <h1>
   Older Races
   <a href="#" (click)="toggleShowOlderRaces($event)" (keyup.enter)="toggleShowOlderRaces($event)">
