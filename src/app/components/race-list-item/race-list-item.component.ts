@@ -15,4 +15,6 @@ import { ButtonModule } from 'primeng/button';
 })
 export class RaceListItemComponent {
   @Input() public model: Race | null = null;
+  @Input() public currentUserVoted: boolean | null = false;
+  @Input() public votingEnded: boolean | null = true;
 }
