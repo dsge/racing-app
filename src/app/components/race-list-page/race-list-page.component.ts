@@ -30,68 +30,10 @@ export class RaceListPageComponent {
   protected dialogService: DialogService = inject(DialogService);
   protected refreshTrigger$: Subject<void> = new Subject<void>();
 
-  protected fakeModels: Race[] = [
-    {
-      race_name: 'My Sample Race',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-02-05 20:10:10'
-    },
-    {
-      race_name: 'My Other Sample Race',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-10-04 10:10:11'
-    },
-    {
-      race_name: 'Lorem Ipsum Dolor',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-02-04 10:10:12'
-    },
-    {
-      race_name: 'Sit Amet',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-02-04 10:10:13'
-    },
-    {
-      race_name: 'Dolor Ipsum',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-10-04 10:10:13'
-    },
-    {
-      race_name: 'Dolor Ipsum',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-10-04 10:10:13'
-    },
-    {
-      race_name: 'Dolor Ipsum',
-      drivers_from_year: 2024,
-      race_end_date: '2024-02-07',
-      race_start_date: '2024-02-06',
-    },
-    {
-      race_name: 'Dolor Ipsum',
-      drivers_from_year: 2024,
-      race_end_date: '2024-10-05',
-      race_start_date: '2024-10-06',
-      voting_end_time: '2024-04-04 10:10:13'
-    }
-  ];
-
   constructor() {
     this.models$ = this.refreshTrigger$.pipe(
       startWith(null),
-      switchMap(() => this.raceService.getRaces().pipe(map((models: Race[]) => models.concat(this.fakeModels))))
+      switchMap(() => this.raceService.getRaces())
     );
     this.currentRaceModels$ = this.models$.pipe(
       map((models: Race[]) => models.filter((model: Race) => !this.raceService.hasVotingEnded(model)))
