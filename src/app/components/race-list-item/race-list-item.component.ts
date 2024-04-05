@@ -9,12 +9,13 @@ import { RaceService } from '../../services/race.service';
 import { RaceEditModalComponent } from '../race-edit-modal/race-edit-modal.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { formatDistance } from 'date-fns';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
   selector: 'app-race-list-item',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule],
+  imports: [CommonModule, CardModule, ButtonModule, RouterModule],
   providers: [DialogService],
   templateUrl: './race-list-item.component.html',
   styleUrl: './race-list-item.component.scss',

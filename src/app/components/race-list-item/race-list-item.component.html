@@ -31,7 +31,7 @@
             <p-button label="Edit your vote" severity="warning" *ngIf="currentUserVoted"></p-button>
           </ng-container>
           <ng-container *ngIf="votingEnded">
-            <p-button label="View Results" severity="info"></p-button>
+            <p-button [routerLink]="['/', 'races', model.id, 'results']" label="View Results" severity="info"></p-button>
           </ng-container>
         </div>
       </div>
