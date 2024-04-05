@@ -46,7 +46,7 @@ export class UserService {
         if (!user) {
           return of(false);
         }
-        return from(this.apiService.getSupabaseClient().from('user_permissions').select('id, is_moderator').match({'is_moderator': true, 'user_uuid': user.id}).returns<{is_moderator: boolean}[]>())
+        return from(this.apiService.getSupabaseClient().from('user_profiles').select('id, is_moderator').match({'is_moderator': true, 'id': user.id}).returns<{is_moderator: boolean}[]>())
           .pipe(
             map((res: { data: {is_moderator: boolean}[] | null }) => res.data?.[0]?.is_moderator ?? false)
           )

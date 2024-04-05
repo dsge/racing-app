@@ -12,9 +12,6 @@ SET row_security = off;
 SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
--- user_permissions user_uuid is_moderator
-
-
 -- authorize with role-based access control
 create or replace function public.is_moderator()
 returns boolean as $$
@@ -24,7 +21,7 @@ begin
   select count(*)
   from public.user_permissions
   where user_permissions.is_moderator = true
-    and user_permissions.user_uuid::uuid = (auth.uid())
+    and user_permissions.id::uuid = (auth.uid())
   into bind_permissions;
 
   return bind_permissions > 0;
