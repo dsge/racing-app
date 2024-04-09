@@ -52,5 +52,8 @@
   },
   "resolutions": {
     "@supabase/gotrue-js": "2.61.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
