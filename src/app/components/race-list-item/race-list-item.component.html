@@ -27,8 +27,8 @@
       <div class="grid">
         <div class="col-12">
           <ng-container *ngIf="!votingEnded">
-            <p-button label="Add your vote" severity="success" *ngIf="!currentUserVoted"></p-button>
-            <p-button label="Edit your vote" severity="warning" *ngIf="currentUserVoted"></p-button>
+            <p-button label="Add your vote" (click)="onUserVoteAddButtonClick(model)" severity="success" *ngIf="!currentUserVoted"></p-button>
+            <p-button label="Edit your vote" (click)="onUserVoteEditButtonClick(model)" severity="warning" *ngIf="currentUserVoted"></p-button>
           </ng-container>
           <ng-container *ngIf="votingEnded">
             <p-button [routerLink]="['/', 'races', model.id, 'results']" label="View Results" severity="info"></p-button>

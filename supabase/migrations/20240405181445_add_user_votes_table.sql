@@ -16,8 +16,8 @@ SET default_table_access_method = "heap";
 CREATE TABLE IF NOT EXISTS "public"."user_votes" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "race_id" bigint NOT NULL,
-    "driver_id" bigint NOT NULL,
+    "race_id" bigint NOT NULL references "public"."races",
+    "driver_id" bigint NOT NULL references "public"."drivers",
     "driver_final_position" int NOT NULL,
     "user_uuid" uuid NOT NULL
 );

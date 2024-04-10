@@ -10,6 +10,7 @@ import { RaceEditModalComponent } from '../race-edit-modal/race-edit-modal.compo
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { formatDistance } from 'date-fns';
 import { RouterModule } from '@angular/router';
+import { VoteEditModalComponent } from '../vote-edit-modal/vote-edit-modal.component';
 
 
 @Component({
@@ -46,16 +47,37 @@ export class RaceListItemComponent {
   }
 
   public onEditRaceClick(model: Race): void {
-    this.openDialog('Edit Race', model);
+    this.openRaceEditDialog('Edit Race', model);
   }
 
-  protected openDialog(headerText: string = '', model?: Race): void {
+  public onUserVoteAddButtonClick(model: Race): void {
+    this.openUserVoteEditDialog('Add Votes', model);
+  }
+
+  public onUserVoteEditButtonClick(model: Race): void {
+    this.openUserVoteEditDialog('Edit Votes', model);
+  }
+
+  protected openRaceEditDialog(headerText: string = '', model?: Race): void {
     const dialogRef: DynamicDialogRef = this.dialogService.open(
       RaceEditModalComponent,
       {
         header: headerText,
         data: {
           model: model
+        }
+      }
+    );
+    dialogRef.onClose.pipe(take(1), finalize(() => { this.modelEdit.emit(model ?? null) })).subscribe();
+  }
+
+  protected openUserVoteEditDialog(headerText: string = '', model?: Race): void {
+    const dialogRef: DynamicDialogRef = this.dialogService.open(
+      VoteEditModalComponent,
+      {
+        header: headerText,
+        data: {
+          race: model
         }
       }
     );

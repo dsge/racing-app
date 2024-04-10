@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { format, formatDistance, formatISO, isBefore, parse, parseISO } from 'date-fns';
+import { format, formatISO, isBefore, parseISO } from 'date-fns';
 import { Race } from '../models/race.model';
-import { Observable, from, map, of } from 'rxjs';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { Observable, combineLatest, from, map, of, switchMap, take } from 'rxjs';
+import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
 import { ApiService } from './api.service';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,16 +12,30 @@ import { ApiService } from './api.service';
 export class RaceService {
 
   protected apiService: ApiService = inject(ApiService);
+  protected userService: UserService = inject(UserService);
 
   public getRaces(): Observable<Race[]> {
-    return from(this.apiService.getSupabaseClient().from('races').select().returns<Race[]>())
-      .pipe(
-        map((res: { data: Race[] | null }) => res.data ?? [])
-      )
+    return this.userService.getUser().pipe(
+      take(1),
+      switchMap((user: User | null) => {
+        if (!user) {
+          return of([]);
+        }
+        return from(this.apiService.getSupabaseClient().from('races').select().returns<Race[]>())
+          .pipe(
+            map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []),
+            switchMap((models: Race[]) => combineLatest(
+              models.map((model: Race) => this.getUserHasVoted(model, user).pipe(
+                map((currentUserHasVoted: boolean) => ({...model, current_user_has_voted: currentUserHasVoted}))
+              ))
+            ))
+          )
+      })
+    );
   }
 
   public hasUserVoted(race: Race): Observable<boolean> {
-    return of(Math.round((Math.random() * 1000)) % 2 == 0);
+    return of(race.current_user_has_voted ?? false);
   }
 
   public hasVotingEnded(race: Race): boolean {
@@ -56,5 +71,19 @@ export class RaceService {
       ret.voting_end_time = formatISO(ret.voting_end_time as unknown as Date);
     }
     return ret;
+  }
+
+  protected getUserHasVoted(race: Race, user: User): Observable<boolean> {
+    return from(
+            this.apiService.getSupabaseClient()
+              .from('user_votes')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_uuid', user.id)
+              .eq('race_id', race.id)
+              .returns<null>()
+            )
+          .pipe(
+            map((res: PostgrestSingleResponse<null>) => !!res.count ?? false),
+          )
   }
 }

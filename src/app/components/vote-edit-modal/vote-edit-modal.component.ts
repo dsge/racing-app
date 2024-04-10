@@ -39,6 +39,8 @@ export class VoteEditModalComponent {
       label: year + '',
       value: year
     }))
+
+    // this.userVoteService.getUserVotes(this.data.race)
   }
 
   public onSubmit(): void {
