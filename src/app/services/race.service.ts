@@ -83,7 +83,7 @@ export class RaceService {
               .returns<null>()
             )
           .pipe(
-            map((res: PostgrestSingleResponse<null>) => !!res.count ?? false),
+            map((res: PostgrestSingleResponse<null>) => !!res.count),
           )
   }
 }

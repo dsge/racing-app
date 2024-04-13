@@ -17,6 +17,13 @@ export class DriverService {
       )
   }
 
+  public getDriverById(id: number): Observable<Driver | undefined> {
+    return from(this.apiService.getSupabaseClient().from('drivers').select().match({'id': id}).returns<Driver[]>())
+      .pipe(
+        map((res: { data: Driver[] | null }) => res.data?.[0] ?? undefined)
+      )
+  }
+
   public createDriver(model: Driver): Observable<PostgrestSingleResponse<null>> {
     return from(this.apiService.getSupabaseClient().from('drivers').insert(model));
   }

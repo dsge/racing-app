@@ -4,3 +4,17 @@ p-button ::ng-deep button {
   width: 100%;
   margin-top: 25px;
 }
+
+:host {
+  min-width: 40vw;
+  display: block;
+}
+
+.loading {
+  min-height: 60vh;
+
+  p-progressSpinner {
+    display: block;
+    width: 100%;
+  }
+}

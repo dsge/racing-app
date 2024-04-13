@@ -1,6 +1,40 @@
-<p>vote-edit-modal works!</p>
 <div class="grid" *ngIf="data && data.race">
-  <div class="col-12">
-    yes race
+  <div class="col-12" *ngIf="{ userVotes: userVotes$ | async, possibleDrivers: possibleDrivers$ | async } as data">
+    <ng-container *ngIf="!(loadingCurrentUserVotes && loadingPossibleDrivers); else loadingScreen">
+      <ng-container [ngTemplateOutlet]="votingScreen" [ngTemplateOutletContext]="data"></ng-container>
+    </ng-container>
   </div>
 </div>
+
+<ng-template #votingScreen let-userVotes="userVotes" let-possibleDrivers="possibleDrivers">
+
+  <form #form="ngForm">
+    <ng-container *ngFor="let position of getPositions(possibleDrivers ?? [])">
+      <div class="field">
+        <app-vote-edit-input-row
+          [value]="getDriverVotedForPosition(position) | async"
+          (valueChange)="voteDriverForPosition(position, $event)"
+          [dropdownOptions]="driverOptions$ | async"
+          [position]="position"
+        ></app-vote-edit-input-row>
+      </div>
+    </ng-container>
+
+    <p-button
+      type="submit"
+      label="Save"
+      severity="primary"
+      (click)="onSubmit()"
+      (keyup)="onSubmit()"
+      [disabled]="!!form.invalid"
+      [loading]="saving"
+    ></p-button>
+  </form>
+
+</ng-template>
+
+<ng-template #loadingScreen>
+    <div class="loading flex justify-content-center align-content-center flex-wrap">
+      <p-progressSpinner class="flex" ariaLabel="loading"></p-progressSpinner>
+    </div>
+</ng-template>

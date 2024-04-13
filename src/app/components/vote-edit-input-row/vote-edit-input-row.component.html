@@ -1,0 +1,21 @@
+<div class="grid">
+  <div class="col-4">
+    <label [attr.for]="'vote' + position">Vote for position #{{ position }}</label>
+  </div>
+  <div class="col-8">
+    <ng-container>
+      <p-dropdown
+        [attr.id]="'vote' + position"
+        [name]="'vote' + position"
+        [options]="dropdownOptions ?? []"
+        [ngModel]="value"
+        (ngModelChange)="valueChange.emit($event)"
+        [showClear]="true"
+        [placeholder]="'Select a Driver for position #' + position"
+        [required]="true"
+        appendTo="body"
+        [style]="{'width':'100%'}"
+      ></p-dropdown>
+    </ng-container>
+  </div>
+</div>
