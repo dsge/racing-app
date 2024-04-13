@@ -70,6 +70,10 @@ export class RaceService {
     if (ret.voting_end_time as unknown as object instanceof Date) {
       ret.voting_end_time = formatISO(ret.voting_end_time as unknown as Date);
     }
+    if (Object.hasOwn(ret, 'current_user_has_voted')) {
+      delete ret.current_user_has_voted;
+    }
+    console.log('SAVING...', ret)
     return ret;
   }
 

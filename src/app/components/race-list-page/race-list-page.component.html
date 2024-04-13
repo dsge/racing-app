@@ -2,7 +2,12 @@
 <div class="grid">
   <div class="col-4" *ngFor="let model of currentRaceModels$ | async">
     <ng-container *ngIf="{ currentUserVoted: hasUserVoted(model) | async, votingEnded: hasVotingEnded(model) } as data">
-      <app-race-list-item [model]="model" [currentUserVoted]="data.currentUserVoted" [votingEnded]="data.votingEnded"></app-race-list-item>
+      <app-race-list-item
+        [model]="model"
+        [currentUserVoted]="data.currentUserVoted"
+        [votingEnded]="data.votingEnded"
+        (modelEdit)="onModelEdit()"
+      ></app-race-list-item>
     </ng-container>
   </div>
 </div>

@@ -68,7 +68,7 @@ export class RaceListItemComponent {
         }
       }
     );
-    dialogRef.onClose.pipe(take(1), finalize(() => { this.modelEdit.emit(model ?? null) })).subscribe();
+    dialogRef.onClose.pipe(take(1), finalize(() => { console.log('FINALIZE'); this.modelEdit.emit(model ?? null) })).subscribe();
   }
 
   protected openUserVoteEditDialog(headerText: string = '', model?: Race): void {

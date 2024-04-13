@@ -39,12 +39,51 @@ export class UserVoteService {
     );
   }
 
-  public setUserVotes(race: Race, votes: UserVote[]): Observable<PostgrestSingleResponse<null>> {
-    console.log('SetUserVotes', race, votes);
-    return of();
+  public setUserVotes(race: Race, votes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> {
+    return this.userService.getUser().pipe(
+      take(1),
+      switchMap((user: User | null) => {
+        if (!user) {
+          return of(null);
+        }
+        return this.removePreviousVotes(race, user).pipe(
+            switchMap(() => from(
+                this.apiService.getSupabaseClient()
+                  .from('user_votes')
+                  .insert(this.raceAndVotesToRecords(race, votes, user))
+                  .returns()
+              )
+            )
+          )
+      })
+    );
+  }
+
+  protected removePreviousVotes(race: Race, user: User): Observable<PostgrestSingleResponse<unknown>> {
+    return from(
+      this.apiService.getSupabaseClient()
+        .from('user_votes')
+        .delete()
+        .eq('user_uuid', user.id)
+        .eq('race_id', race.id)
+    );
+  }
+
+  protected raceAndVotesToRecords(race: Race, votes: UserVote[], user: User): UserVoteRecord[] {
+    return votes.map((vote: UserVote) => {
+      return {
+        user_uuid: user.id,
+        race_id: race.id,
+        driver_id: vote.driver.id,
+        driver_final_position: vote.driver_final_position
+      }
+    })
   }
 
   protected userVoteRecordsToUserVotes(voteRecords: UserVoteRecord[]): Observable<UserVote[]> {
+    if (!voteRecords.length) {
+      return of([]);
+    }
     return combineLatest(voteRecords.map((voteRecord: UserVoteRecord) => this.userVoteRecordToUserVote(voteRecord))).pipe(
       map((userVotes: (UserVote | undefined)[]) => userVotes.filter((userVote: UserVote | undefined) => !!userVote) as UserVote[] ),
       take(1),

@@ -19,9 +19,9 @@ declare
   bind_permissions int;
 begin
   select count(*)
-  from public.user_permissions
-  where user_permissions.is_moderator = true
-    and user_permissions.id::uuid = (auth.uid())
+  from public.user_profiles
+  where user_profiles.is_moderator = true
+    and user_profiles.id::uuid = (auth.uid())
   into bind_permissions;
 
   return bind_permissions > 0;

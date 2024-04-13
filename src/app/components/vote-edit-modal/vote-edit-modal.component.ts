@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
-import { take, tap, finalize, Observable, shareReplay, map, combineLatest, BehaviorSubject } from 'rxjs';
+import { take, tap, finalize, Observable, shareReplay, map, combineLatest, BehaviorSubject, switchMap } from 'rxjs';
 import { Race } from '../../models/race.model';
 import { ToastService } from '../../services/toast.service';
 import { YearsService } from '../../services/years.service';
@@ -92,12 +92,15 @@ export class VoteEditModalComponent {
   }
 
   public onSubmit(): void {
-    this.userVoteService.setUserVotes(this.data.race!, []).pipe(
+    this.userVotes$.pipe(
+      switchMap((userVotes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> =>
+        this.userVoteService.setUserVotes(this.data.race!, userVotes)
+      ),
       take(1),
       tap(() => { this.saving = true; }),
       finalize(() => { this.saving = false; })
-    ).subscribe((res: PostgrestSingleResponse<null>) => {
-      if (res.error) {
+    ).subscribe((res: PostgrestSingleResponse<unknown> | null) => {
+      if (res?.error) {
         this.toastService.add({
           severity: 'error',
           summary: 'Save failed',
@@ -106,16 +109,15 @@ export class VoteEditModalComponent {
       } else {
         this.dialogRef.close({ success: true })
       }
-    });
+    })
   }
 
   protected createUserVotes(): Observable<UserVote[]> {
     return combineLatest([
-      this.userVoteService.getUserVotes(this.data.race).pipe(take(1), tap(() => { this.loadingCurrentUserVotes = false; })),
+      this.userVoteService.getUserVotes(this.data.race).pipe(tap(() => { this.loadingCurrentUserVotes = false; })),
       this.newUserVotes$
     ]).pipe(
       map(([savedUserVotes, newUserVotes]: [UserVote[], UserVote[]]) => {
-        console.log('ioio', newUserVotes)
         const ret: UserVote[] = [];
         for (let driver_final_position: number = 1; driver_final_position <= 10; driver_final_position++) {
           const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position);
