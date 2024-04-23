@@ -14,7 +14,7 @@ In repo root:
 ## Running
 
 - `npx supabase start`
-- `ng serve`
+- `npx ng serve`
 
 ## Development
 
