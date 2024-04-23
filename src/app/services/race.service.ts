@@ -73,7 +73,6 @@ export class RaceService {
     if (Object.hasOwn(ret, 'current_user_has_voted')) {
       delete ret.current_user_has_voted;
     }
-    console.log('SAVING...', ret)
     return ret;
   }
 
