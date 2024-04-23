@@ -35,6 +35,8 @@
             id="race_start_date"
             name="race_start_date"
             [(ngModel)]="data.model.race_start_date"
+            dateFormat="yy-mm-dd"
+            dataType="string"
             [style]="{'width':'100%'}"
             placeholder="Select a date"
             appendTo="body"
@@ -48,6 +50,8 @@
             id="race_end_date"
             name="race_end_date"
             [(ngModel)]="data.model.race_end_date"
+            dateFormat="yy-mm-dd"
+            dataType="string"
             [style]="{'width':'100%'}"
             placeholder="Select a date"
             appendTo="body"
@@ -60,7 +64,10 @@
           <p-calendar
             id="voting_end_time"
             name="voting_end_time"
-            [(ngModel)]="data.model.voting_end_time"
+            [ngModel]="getTimeField('voting_end_time')"
+            (ngModelChange)="onTimeChange('voting_end_time', $event)"
+            dateFormat="yy-mm-dd"
+            dataType="string"
             [showTime]="true"
             [style]="{'width':'100%'}"
             placeholder="Select a time"
@@ -68,7 +75,6 @@
             [required]="true"
           ></p-calendar>
         </div>
-
 
         <p-button
           type="submit"
