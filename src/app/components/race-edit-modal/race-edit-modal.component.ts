@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Race } from '../../models/race.model';
 import { RaceService } from '../../services/race.service';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -12,6 +12,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { YearsService } from '../../services/years.service';
 import { SelectItem } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
+import { format, parseISO } from 'date-fns';
 
 
 
@@ -23,7 +24,7 @@ import { CalendarModule } from 'primeng/calendar';
   styleUrl: './race-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RaceEditModalComponent {
+export class RaceEditModalComponent implements OnInit {
   public loading: boolean = false;
   public isNewModel: boolean = true;
   public yearOptions: SelectItem<number>[];
@@ -55,6 +56,19 @@ export class RaceEditModalComponent {
       this.isNewModel = true;
     } else {
       this.isNewModel = false;
+    }
+  }
+
+  public getTimeField(fieldName: string | undefined): string | null {
+    if (fieldName && this.data.model?.[fieldName as keyof Race]) {
+      return format(parseISO(this.data.model[fieldName as keyof Race] as string), 'yyyy-MM-dd HH:mm');
+    }
+    return null;
+  }
+
+  public onTimeChange(fieldName: keyof Race, value: string): void {
+    if (this.data.model) {
+      (this.data.model as unknown as Record<keyof Race, string>)[fieldName] = new Date(value).toISOString();
     }
   }
 

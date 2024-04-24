@@ -62,7 +62,6 @@ export class RaceListPageComponent {
   }
 
   public onModelEdit(): void {
-    console.log('ONMODELEDIT')
     this.refreshTrigger$.next();
   }
 
