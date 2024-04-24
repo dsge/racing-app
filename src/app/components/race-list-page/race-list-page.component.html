@@ -1,16 +1,21 @@
-<h1>Current Races</h1>
-<div class="grid">
-  <div class="col-4" *ngFor="let model of currentRaceModels$ | async">
-    <ng-container *ngIf="{ currentUserVoted: hasUserVoted(model) | async, votingEnded: hasVotingEnded(model) } as data">
-      <app-race-list-item
-        [model]="model"
-        [currentUserVoted]="data.currentUserVoted"
-        [votingEnded]="data.votingEnded"
-        (modelEdit)="onModelEdit()"
-      ></app-race-list-item>
-    </ng-container>
-  </div>
-</div>
+<ng-container *ngIf="ongoingRaceModels$ | async as ongoingRaceModels">
+  <app-race-list-section
+    title="Ongoing Race(s)"
+    [models]="ongoingRaceModels"
+    (modelEdit)="onModelEdit()"
+    [itemsCanBeHidden]="false"
+  ></app-race-list-section>
+</ng-container>
+
+<ng-container *ngIf="upcomingRaceModels$ | async as upcomingRaceModels">
+  <app-race-list-section
+    title="Upcoming Races"
+    [models]="upcomingRaceModels"
+    (modelEdit)="onModelEdit()"
+    [itemsCanBeHidden]="false"
+  ></app-race-list-section>
+</ng-container>
+
 <div class="grid">
   <div class="col-offset-5 col-2">
     <p-button
@@ -22,22 +27,25 @@
     ></p-button>
   </div>
 </div>
-<h1>
-  Older Races
-  <a href="#" (click)="toggleShowOlderRaces($event)" (keyup.enter)="toggleShowOlderRaces($event)">
-    <ng-container *ngIf="showOlderRaces">[hide]</ng-container>
-    <ng-container *ngIf="!showOlderRaces">[show]</ng-container>
-  </a>
-</h1>
-<div class="grid" *ngIf="showOlderRaces">
-  <div class="col-4" *ngFor="let model of olderRaceModels$ | async">
-    <ng-container *ngIf="{ currentUserVoted: hasUserVoted(model) | async, votingEnded: hasVotingEnded(model) } as data">
-      <app-race-list-item
-        [model]="model"
-        [currentUserVoted]="data.currentUserVoted"
-        [votingEnded]="data.votingEnded"
-        (modelEdit)="onModelEdit()"
-      ></app-race-list-item>
-    </ng-container>
-  </div>
-</div>
+
+<ng-container *ngIf="recentRaceModels$ | async as recentRaceModels">
+  <app-race-list-section
+    title="Recent Races"
+    [models]="recentRaceModels"
+    (modelEdit)="onModelEdit()"
+    [itemsCanBeHidden]="false"
+  ></app-race-list-section>
+</ng-container>
+
+
+<ng-container *ngFor="let year of getYears()">
+  <ng-container *ngIf="getOlderRacesByYear(year) | async as olderRaceModels">
+    <app-race-list-section
+      [title]="'Older Races (' + year + ')'"
+      [models]="olderRaceModels"
+      (modelEdit)="onModelEdit()"
+      [itemsVisibleByDefault]="false"
+      (itemsVisibleToggled)="onOlderRacesItemsVisibleToggled(year)"
+    ></app-race-list-section>
+  </ng-container>
+</ng-container>
