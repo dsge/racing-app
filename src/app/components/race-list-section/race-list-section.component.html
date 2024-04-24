@@ -1,0 +1,27 @@
+<h1>
+  {{ title }}
+  <a href="#" (click)="toggleItemsVisible($event)" (keyup.enter)="toggleItemsVisible($event)" *ngIf="itemsCanBeHidden">
+    <ng-container *ngIf="itemsVisible">[hide]</ng-container>
+    <ng-container *ngIf="!itemsVisible">[show]</ng-container>
+  </a>
+</h1>
+<div class="grid" *ngIf="itemsVisible">
+  <ng-container *ngIf="models?.length; else noItems">
+    <div class="col-4" *ngFor="let model of models">
+      <ng-container *ngIf="{ currentUserVoted: hasUserVoted(model) | async, votingEnded: hasVotingEnded(model) } as data">
+        <app-race-list-item
+          [model]="model"
+          [currentUserVoted]="data.currentUserVoted"
+          [votingEnded]="data.votingEnded"
+          (modelEdit)="onModelEdit()"
+        ></app-race-list-item>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #noItems>
+  <div class="col-4 col-offset-4 text-center">
+    No Results
+  </div>
+</ng-template>

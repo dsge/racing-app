@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { getYearsListStartingFrom } from '../utils/years';
+import { getYear } from 'date-fns';
 
 @Injectable({
   providedIn: 'root'
@@ -10,5 +11,13 @@ export class YearsService {
    */
   public getYears(): number[] {
     return getYearsListStartingFrom(2023);
+  }
+
+  public getYearsDescending(): number[] {
+    return this.getYears().reverse();
+  }
+
+  public getCurrentYear(): number {
+    return getYear(new Date());
   }
 }
