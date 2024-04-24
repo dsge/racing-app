@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { VoteEditInputRowComponent } from './vote-edit-input-row.component';
 
 describe('VoteEditInputRowComponent', () => {
@@ -11,7 +10,7 @@ describe('VoteEditInputRowComponent', () => {
       imports: [VoteEditInputRowComponent]
     })
     .compileComponents();
-    
+
     fixture = TestBed.createComponent(VoteEditInputRowComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

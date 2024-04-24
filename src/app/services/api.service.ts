@@ -7,13 +7,12 @@ import { environment } from '../../environments/environment';
 })
 export class ApiService {
 
-  protected readonly supabaseClient: SupabaseClient;
-
-  constructor() {
-    this.supabaseClient = createClient(environment.APP_SUPABASE_URL, environment.APP_SUPABASE_KEY);
-  }
+  protected supabaseClient?: SupabaseClient;
 
   public getSupabaseClient(): SupabaseClient {
+    if (!this.supabaseClient) {
+      this.supabaseClient = createClient(environment.APP_SUPABASE_URL, environment.APP_SUPABASE_KEY);
+    }
     return this.supabaseClient;
   }
 }

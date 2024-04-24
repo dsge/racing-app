@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Optional, Output } from '@angular/core';
 import { ControlContainer, FormsModule, NgForm } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { Driver } from '../../models/driver.model';
@@ -9,7 +9,13 @@ import { SelectItem } from 'primeng/api';
   selector: 'app-vote-edit-input-row',
   standalone: true,
   imports: [CommonModule, FormsModule, DropdownModule],
-  viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ],
+  viewProviders: [
+    {
+      provide: ControlContainer,
+      useFactory: (container?: ControlContainer) => container,
+      deps: [[new Optional(), NgForm]]
+    }
+  ],
   templateUrl: './vote-edit-input-row.component.html',
   styleUrl: './vote-edit-input-row.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

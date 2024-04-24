@@ -3,7 +3,7 @@ import { Driver } from '../../models/driver.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DriverService } from '../../services/driver.service';
 import { Observable, finalize, take, tap } from 'rxjs';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
@@ -12,7 +12,7 @@ import { ToastService } from '../../services/toast.service';
 @Component({
   selector: 'app-driver-edit-modal',
   standalone: true,
-  imports: [FormsModule, CommonModule, ButtonModule],
+  imports: [FormsModule, CommonModule, ButtonModule, DynamicDialogModule],
   templateUrl: './driver-edit-modal.component.html',
   styleUrl: './driver-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

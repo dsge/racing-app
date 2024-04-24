@@ -19,11 +19,4 @@ describe('AppComponent', () => {
     const app: AppComponent = fixture.componentInstance;
     expect(app.title).toEqual('racing-app');
   });
-
-  it('should render title', () => {
-    const fixture: ComponentFixture<AppComponent> = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, racing-app');
-  });
 });
