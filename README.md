@@ -34,3 +34,8 @@ In repo root:
 - editorconfig
 - eslint
 
+## Notes
+
+```
+for name in $(docker ps -a --format '{{.Names}}' | grep supabase_ | grep _racing-app) ; do docker update --restart=no $name ; done
+```
