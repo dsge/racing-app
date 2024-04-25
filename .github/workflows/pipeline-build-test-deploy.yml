@@ -1,0 +1,43 @@
+name: Build, Test
+
+on: [push]
+
+jobs:
+  build:
+    name: All Steps (Build, Test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Chrome Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgconf-2-4 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libgbm-dev libnss3-dev libxss-dev libasound2
+      - name: Setup Chrome Headless
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Run Linter
+        run: npx ng lint
+
+      - name: Run Unit Tests
+        run: npx ng test --browsers=ChromeHeadless --code-coverage --watch=false
+
+      - name: Build Application
+        run: npx ng build --configuration=github
