@@ -2,17 +2,17 @@ import { Injectable, inject } from '@angular/core';
 import { format, formatISO, isBefore, parseISO, sub } from 'date-fns';
 import { Race } from '../models/race.model';
 import { Observable, combineLatest, from, map, of, switchMap, take } from 'rxjs';
-import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
-import { ApiService } from './api.service';
+import { PostgrestSingleResponse, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserService } from './user.service';
 import { YearsService } from './years.service';
+import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RaceService {
 
-  protected apiService: ApiService = inject(ApiService);
+  protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userService: UserService = inject(UserService);
   protected yearsService: YearsService = inject(YearsService);
 
@@ -29,21 +29,21 @@ export class RaceService {
   }
 
   public createRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(this.apiService.getSupabaseClient().from('races').insert(this.stringifyRaceFieldsIfNeeded(model)));
+    return from(this.supabaseClient.from('races').insert(this.stringifyRaceFieldsIfNeeded(model)));
   }
 
   public updateRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(this.apiService.getSupabaseClient().from('races').update(this.stringifyRaceFieldsIfNeeded(model)).eq('id', model.id));
+    return from(this.supabaseClient.from('races').update(this.stringifyRaceFieldsIfNeeded(model)).eq('id', model.id));
   }
 
   public deleteRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(this.apiService.getSupabaseClient().from('races').delete().eq('id', model.id));
+    return from(this.supabaseClient.from('races').delete().eq('id', model.id));
   }
 
   public getOngoingRaces(): Observable<Race[]> {
     const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
     return this.addCurrentUserHasVotedField(
-      from(this.apiService.getSupabaseClient()
+      from(this.supabaseClient
           .from('races')
           .select()
           .lte('race_start_date', todaysDate)
@@ -58,7 +58,7 @@ export class RaceService {
 
   public getUpcomingRaces(): Observable<Race[]> {
     const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
-    return from(this.apiService.getSupabaseClient()
+    return from(this.supabaseClient
         .from('races')
         .select()
         .gt('race_start_date', todaysDate)
@@ -72,7 +72,7 @@ export class RaceService {
   public getRecentRaces(): Observable<Race[]> {
     const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
     const pastOneMonthDate: string = format(sub(new Date(), { months: 1 }), 'yyyy-MM-dd');
-    return from(this.apiService.getSupabaseClient()
+    return from(this.supabaseClient
         .from('races')
         .select()
         .gt('race_end_date', pastOneMonthDate)
@@ -96,7 +96,7 @@ export class RaceService {
       endDate = endOfYear;
     }
 
-    return from(this.apiService.getSupabaseClient()
+    return from(this.supabaseClient
       .from('races')
       .select()
       .gte('race_end_date', startOfYear)
@@ -109,7 +109,7 @@ export class RaceService {
 
   protected getRaces(): Observable<Race[]> {
     return this.addCurrentUserHasVotedField(
-      from(this.apiService.getSupabaseClient().from('races').select().returns<Race[]>())
+      from(this.supabaseClient.from('races').select().returns<Race[]>())
         .pipe(
           map((res: PostgrestSingleResponse<Race[]>) => res.data ?? [])
         )
@@ -155,7 +155,7 @@ export class RaceService {
 
   protected getUserHasVoted(race: Race, user: User): Observable<boolean> {
     return from(
-            this.apiService.getSupabaseClient()
+            this.supabaseClient
               .from('user_votes')
               .select('*', { count: 'exact', head: true })
               .eq('user_uuid', user.id)

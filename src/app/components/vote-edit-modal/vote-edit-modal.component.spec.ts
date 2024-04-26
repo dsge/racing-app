@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { VoteEditModalComponent } from './vote-edit-modal.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { provideMockApiService } from '../../services/testing/provide-mock-api.service';
 import { DriverService } from '../../services/driver.service';
 import { of } from 'rxjs';
 import { UserVoteService } from '../../services/user-vote.service';
+import { provideMockSupabaseClient } from '../../providers/provide-mock-supabase-client';
 
 describe('VoteEditModalComponent', () => {
   let component: VoteEditModalComponent;
@@ -19,7 +19,7 @@ describe('VoteEditModalComponent', () => {
       providers: [
         { provide: DialogService, useValue: { getInstance: jasmine.createSpy().and.returnValue({ data: { race: { drivers_from_year: 1 } } }) } },
         { provide: DynamicDialogRef, useValue: jasmine.createSpyObj('', ['close']) },
-        provideMockApiService()
+        provideMockSupabaseClient()
       ]
     })
     .compileComponents();

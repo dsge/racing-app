@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RaceEditModalComponent } from './race-edit-modal.component';
-import { provideMockApiService } from '../../services/testing/provide-mock-api.service';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { provideMockSupabaseClient } from '../../providers/provide-mock-supabase-client';
 
 describe('RaceEditModalComponent', () => {
   let component: RaceEditModalComponent;
@@ -14,7 +14,7 @@ describe('RaceEditModalComponent', () => {
       providers: [
         { provide: DialogService, useValue: { getInstance: jasmine.createSpy().and.returnValue({ data: {} }) } },
         { provide: DynamicDialogRef, useValue: jasmine.createSpyObj('', ['close']) },
-        provideMockApiService()
+        provideMockSupabaseClient()
       ]
     })
     .compileComponents();

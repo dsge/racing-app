@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DriverEditModalComponent } from './driver-edit-modal.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { provideMockSupabaseClient } from '../../providers/provide-mock-supabase-client';
 
 describe('DriverEditModalComponent', () => {
   let component: DriverEditModalComponent;
@@ -12,7 +13,8 @@ describe('DriverEditModalComponent', () => {
       imports: [DriverEditModalComponent],
       providers: [
         { provide: DialogService, useValue: { getInstance: jasmine.createSpy().and.returnValue({ data: {} }) } },
-        { provide: DynamicDialogRef, useValue: jasmine.createSpyObj('', ['close']) }
+        { provide: DynamicDialogRef, useValue: jasmine.createSpyObj('', ['close']) },
+        provideMockSupabaseClient()
       ]
     })
     .compileComponents();

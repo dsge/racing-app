@@ -1,18 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from './api.service';
 import { Race } from '../models/race.model';
 import { Observable, combineLatest, from, map, of, switchMap, take } from 'rxjs';
-import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
+import { PostgrestSingleResponse, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserVote, UserVoteRecord } from '../models/user-vote.model';
 import { UserService } from './user.service';
 import { DriverService } from './driver.service';
 import { Driver } from '../models/driver.model';
+import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserVoteService {
-  protected apiService: ApiService = inject(ApiService);
+  protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userService: UserService = inject(UserService);
   protected driverService: DriverService = inject(DriverService);
 
@@ -24,7 +24,7 @@ export class UserVoteService {
           return of([]);
         }
         return from(
-          this.apiService.getSupabaseClient()
+          this.supabaseClient
             .from('user_votes')
             .select('*')
             .eq('user_uuid', user.id)
@@ -48,7 +48,7 @@ export class UserVoteService {
         }
         return this.removePreviousVotes(race, user).pipe(
             switchMap(() => from(
-                this.apiService.getSupabaseClient()
+                this.supabaseClient
                   .from('user_votes')
                   .insert(this.raceAndVotesToRecords(race, votes, user))
                   .returns()
@@ -61,7 +61,7 @@ export class UserVoteService {
 
   protected removePreviousVotes(race: Race, user: User): Observable<PostgrestSingleResponse<unknown>> {
     return from(
-      this.apiService.getSupabaseClient()
+      this.supabaseClient
         .from('user_votes')
         .delete()
         .eq('user_uuid', user.id)

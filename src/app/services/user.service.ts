@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthChangeEvent, AuthError, AuthTokenResponsePassword, Session, SignInWithPasswordCredentials, Subscription, User } from '@supabase/supabase-js';
+import { AuthChangeEvent, AuthError, AuthTokenResponsePassword, Session, SignInWithPasswordCredentials, Subscription, SupabaseClient, User } from '@supabase/supabase-js';
 import { Observable, from, map, Subscriber, switchMap, of, shareReplay } from 'rxjs';
 import { SupabaseAuthStateChangeEvent } from '../models/user.model';
-import { ApiService } from './api.service';
+import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ import { ApiService } from './api.service';
 export class UserService {
   protected readonly supabaseAuthStateChange$: Observable<SupabaseAuthStateChangeEvent>;
   protected readonly isModerator$: Observable<boolean>;
-  protected readonly apiService: ApiService = inject(ApiService);
+  protected readonly supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
 
   constructor() {
     this.supabaseAuthStateChange$ = this.createSupabaseAuthChangeEventSubject();
@@ -18,7 +18,7 @@ export class UserService {
   }
 
   public signInWithPassword(credentials: SignInWithPasswordCredentials): Observable<AuthTokenResponsePassword> {
-    return from(this.apiService.getSupabaseClient().auth.signInWithPassword(credentials));
+    return from(this.supabaseClient.auth.signInWithPassword(credentials));
   }
 
   /**
@@ -37,7 +37,7 @@ export class UserService {
   }
 
   public signOut(): Observable<{ error: AuthError | null }> {
-    return from(this.apiService.getSupabaseClient().auth.signOut())
+    return from(this.supabaseClient.auth.signOut())
   }
 
   protected createIsModeratorObservable(): Observable<boolean> {
@@ -46,7 +46,7 @@ export class UserService {
         if (!user) {
           return of(false);
         }
-        return from(this.apiService.getSupabaseClient().from('user_profiles').select('id, is_moderator').match({'is_moderator': true, 'id': user.id}).returns<{is_moderator: boolean}[]>())
+        return from(this.supabaseClient.from('user_profiles').select('id, is_moderator').match({'is_moderator': true, 'id': user.id}).returns<{is_moderator: boolean}[]>())
           .pipe(
             map((res: { data: {is_moderator: boolean}[] | null }) => res.data?.[0]?.is_moderator ?? false)
           )
@@ -58,7 +58,7 @@ export class UserService {
   protected createSupabaseAuthChangeEventSubject(): Observable<SupabaseAuthStateChangeEvent> {
     return new Observable<SupabaseAuthStateChangeEvent>((subscriber: Subscriber<SupabaseAuthStateChangeEvent>) => {
       const { data }: { data: { subscription: Subscription; } } =
-        this.apiService.getSupabaseClient().auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+        this.supabaseClient.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
           subscriber.next({ event, session });
         });
       return () => {
