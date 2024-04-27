@@ -20,12 +20,17 @@ export class RaceService {
     return of(race.current_user_has_voted ?? false);
   }
 
-  public hasVotingEnded(race: Race): boolean {
-    return isBefore(this.getVotingEndTime(race), new Date());
+  public hasVotingEnded(race: Race, now: Date = new Date()): boolean {
+    const pastOneMonthDate: Date = sub(now, { months: 1 });
+    return isBefore(this.getVotingEndTime(race), now) || isBefore(this.getRaceEndDate(race), pastOneMonthDate);
   }
 
   public getVotingEndTime(race: Race): Date {
     return parseISO(race.voting_end_time || race.race_start_date);
+  }
+
+  public getRaceEndDate(race: Race): Date {
+    return parseISO(race.race_end_date);
   }
 
   public createRace(model: Race): Observable<PostgrestSingleResponse<null>> {
@@ -40,8 +45,8 @@ export class RaceService {
     return from(this.supabaseClient.from('races').delete().eq('id', model.id));
   }
 
-  public getOngoingRaces(): Observable<Race[]> {
-    const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
+  public getOngoingRaces(now: Date = new Date()): Observable<Race[]> {
+    const todaysDate: string = format(now, 'yyyy-MM-dd');
     return this.addCurrentUserHasVotedField(
       from(this.supabaseClient
           .from('races')
@@ -56,8 +61,8 @@ export class RaceService {
     );
   }
 
-  public getUpcomingRaces(): Observable<Race[]> {
-    const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
+  public getUpcomingRaces(now: Date = new Date()): Observable<Race[]> {
+    const todaysDate: string = format(now, 'yyyy-MM-dd');
     return from(this.supabaseClient
         .from('races')
         .select()
@@ -69,9 +74,9 @@ export class RaceService {
       );
   }
 
-  public getRecentRaces(): Observable<Race[]> {
-    const todaysDate: string = format(new Date(), 'yyyy-MM-dd');
-    const pastOneMonthDate: string = format(sub(new Date(), { months: 1 }), 'yyyy-MM-dd');
+  public getRecentRaces(now: Date = new Date()): Observable<Race[]> {
+    const todaysDate: string = format(now, 'yyyy-MM-dd');
+    const pastOneMonthDate: string = format(sub(now, { months: 1 }), 'yyyy-MM-dd');
     return from(this.supabaseClient
         .from('races')
         .select()
@@ -84,9 +89,9 @@ export class RaceService {
       );
   }
 
-  public getRacesByYear(year: number): Observable<Race[]> {
+  public getRacesByYear(year: number, now: Date = new Date()): Observable<Race[]> {
     const currentYear: number = this.yearsService.getCurrentYear();
-    const pastOneMonthDate: string = format(sub(new Date(), { months: 1 }), 'yyyy-MM-dd');
+    const pastOneMonthDate: string = format(sub(now, { months: 1 }), 'yyyy-MM-dd');
     const startOfYear: string = `${year}-01-01`;
     const endOfYear: string = `${year}-12-31`;
     let endDate: string;
