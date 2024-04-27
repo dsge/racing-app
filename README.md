@@ -1,4 +1,5 @@
-# RacingApp
+# RacingApp 
+![Main Branch](https://github.com/dsge/racing-app/actions/workflows/pipeline-build-test-deploy.yml/badge.svg?branch=main)
 
 ## Requirements
 
