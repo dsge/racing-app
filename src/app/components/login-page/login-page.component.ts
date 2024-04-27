@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
-import { AuthError, AuthTokenResponsePassword } from '@supabase/supabase-js';
+import { AuthTokenResponsePassword } from '@supabase/supabase-js';
 import { finalize, take } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -58,11 +58,6 @@ export class LoginPageComponent {
   }
 
   public signOut(): void {
-    this.userService.signOut()
-      .pipe(take(1)).subscribe((results: {
-        error: AuthError | null;
-      }) => {
-        console.log('results', results)
-      })
+    this.userService.signOut().pipe(take(1)).subscribe()
   }
 }
