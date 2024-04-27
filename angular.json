@@ -40,7 +40,10 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+              "allowedCommonJsDependencies": [
+                "ws"
+            ]
           },
           "configurations": {
             "github": {
