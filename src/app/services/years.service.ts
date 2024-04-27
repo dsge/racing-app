@@ -9,15 +9,15 @@ export class YearsService {
   /**
    * @returns a list of numbers representing years, starting from `firstYear` up until the current year, e.g. [2023, 2024]
    */
-  public getYears(): number[] {
-    return getYearsListStartingFrom(2023);
+  public getYears(now: Date = new Date()): number[] {
+    return getYearsListStartingFrom(2023, now);
   }
 
-  public getYearsDescending(): number[] {
-    return this.getYears().reverse();
+  public getYearsDescending(now: Date = new Date()): number[] {
+    return this.getYears(now).reverse();
   }
 
-  public getCurrentYear(): number {
-    return getYear(new Date());
+  public getCurrentYear(now: Date = new Date()): number {
+    return getYear(now);
   }
 }

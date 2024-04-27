@@ -90,7 +90,7 @@ export class RaceService {
   }
 
   public getRacesByYear(year: number, now: Date = new Date()): Observable<Race[]> {
-    const currentYear: number = this.yearsService.getCurrentYear();
+    const currentYear: number = this.yearsService.getCurrentYear(now);
     const pastOneMonthDate: string = format(sub(now, { months: 1 }), 'yyyy-MM-dd');
     const startOfYear: string = `${year}-01-01`;
     const endOfYear: string = `${year}-12-31`;
