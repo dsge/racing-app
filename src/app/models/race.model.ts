@@ -21,6 +21,7 @@ export interface VoteAndRaceRecordBase {
   race_id?: number,
   driver_id?: number,
   driver_final_position?: number,
+  is_fastest_lap_vote?: boolean,
 }
 
 export interface RaceFinalResultRecord extends VoteAndRaceRecordBase {}

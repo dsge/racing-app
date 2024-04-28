@@ -24,5 +24,16 @@ export class VoteEditInputRowComponent {
   @Output() valueChange: EventEmitter<Driver | null> = new EventEmitter<Driver | null>();
   @Input() value: Driver | null = null;
   @Input() dropdownOptions: SelectItem<Driver>[] | null = [];
-  @Input() position: number | null = null;
+  @Input() position: number | 'fastest-lap' | null = null;
+  @Input() isFastestLapVote: boolean | null = false;
+
+  public getId(): string {
+    if (!this.position && !this.isFastestLapVote) {
+      return '';
+    }
+    if (this.isFastestLapVote) {
+      return 'fastest-lap';
+    }
+    return `${this.position}`;
+  }
 }
