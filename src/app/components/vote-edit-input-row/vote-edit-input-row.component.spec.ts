@@ -13,10 +13,33 @@ describe('VoteEditInputRowComponent', () => {
 
     fixture = TestBed.createComponent(VoteEditInputRowComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
+  });
+
+  describe('getId', () => {
+    it('should return an empty string when no position and no isFastestLapVote', () => {
+      component.position = null;
+      component.isFastestLapVote = false;
+      fixture.detectChanges();
+      expect(component.getId()).toBe('');
+    });
+
+    it('should return "fastest-lap" when isFastestLapVote is true', () => {
+      component.position = 2;
+      component.isFastestLapVote = true;
+      fixture.detectChanges();
+      expect(component.getId()).toBe('fastest-lap');
+    });
+
+    it('should return "2" when isFastestLapVote is false', () => {
+      component.position = 2;
+      component.isFastestLapVote = false;
+      fixture.detectChanges();
+      expect(component.getId()).toBe('2');
+    });
   });
 });
