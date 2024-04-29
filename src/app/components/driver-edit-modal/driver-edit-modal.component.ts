@@ -20,20 +20,18 @@ import { ToastService } from '../../services/toast.service';
 export class DriverEditModalComponent implements OnInit {
   public loading: boolean = false;
   public isNewModel: boolean = true;
-  protected data: {
+  protected data?: {
     year: number | null,
     model: Driver | null,
   };
   protected driverService: DriverService = inject(DriverService);
   protected dialogRef: DynamicDialogRef = inject(DynamicDialogRef);
   protected toastService: ToastService = inject(ToastService);
-
-  constructor(dialogService: DialogService) {
-    this.data = {...(dialogService.getInstance(this.dialogRef).data)};
-  }
+  protected dialogService: DialogService = inject(DialogService);
 
   public ngOnInit(): void {
-    if (this.data.year && !this.data.model) {
+    this.data = {...(this.dialogService.getInstance(this.dialogRef)?.data ?? {})};
+    if (this.data?.year && !this.data.model) {
       this.data.model = {
         full_name: '',
         year_of_racing: this.data.year
@@ -47,9 +45,9 @@ export class DriverEditModalComponent implements OnInit {
   public onSubmit(): void {
     let observable: Observable<PostgrestSingleResponse<null>>;
     if (this.isNewModel) {
-      observable = this.driverService.createDriver(this.data.model!)
+      observable = this.driverService.createDriver(this.data!.model!)
     } else {
-      observable = this.driverService.updateDriver(this.data.model!)
+      observable = this.driverService.updateDriver(this.data!.model!)
     }
     observable.pipe(
       take(1),

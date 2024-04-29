@@ -28,6 +28,7 @@ describe('YearsService', () => {
 
   describe('getCurrentYear', () => {
     it('should return the correct year in 2027', () => {
+      expect(service.getCurrentYear()).toBeDefined();
       expect(service.getCurrentYear(new Date(2027, 6, 6))).toEqual(2027);
     })
   })

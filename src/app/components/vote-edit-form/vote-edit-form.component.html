@@ -1,0 +1,31 @@
+<form #form="ngForm">
+  <ng-container *ngFor="let position of getPositions()">
+    <div class="field">
+      <app-vote-edit-input-row
+        [value]="getDriverVotedForPosition(position)"
+        (valueChange)="voteDriverForPosition(position, $event)"
+        [dropdownOptions]="filteredDriverOptions"
+        [position]="position"
+      ></app-vote-edit-input-row>
+    </div>
+  </ng-container>
+
+  <div class="field">
+    <app-vote-edit-input-row
+      [value]="getDriverVotedForFastestLap()"
+      (valueChange)="voteDriverForFastestLap($event)"
+      [dropdownOptions]="allDriverOptions"
+      [isFastestLapVote]="true"
+    ></app-vote-edit-input-row>
+  </div>
+
+  <p-button
+    type="submit"
+    label="Save"
+    severity="primary"
+    (click)="onSubmitButtonClick()"
+    (keyup)="onSubmitButtonClick()"
+    [disabled]="!!form.invalid"
+    [loading]="saving"
+  ></p-button>
+</form>

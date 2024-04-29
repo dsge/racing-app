@@ -7,19 +7,17 @@ import { Race } from '../../models/race.model';
 import { ToastService } from '../../services/toast.service';
 import { YearsService } from '../../services/years.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 import { UserVoteService } from '../../services/user-vote.service';
 import { UserVote } from '../../models/user-vote.model';
 import { Driver } from '../../models/driver.model';
 import { DriverService } from '../../services/driver.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { VoteEditInputRowComponent } from '../vote-edit-input-row/vote-edit-input-row.component';
+import { VoteEditFormComponent } from '../vote-edit-form/vote-edit-form.component';
 
 @Component({
   selector: 'app-vote-edit-modal',
   standalone: true,
-  imports: [FormsModule, CommonModule, ButtonModule, ProgressSpinnerModule, VoteEditInputRowComponent],
+  imports: [CommonModule, ProgressSpinnerModule, VoteEditFormComponent],
   templateUrl: './vote-edit-modal.component.html',
   styleUrl: './vote-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,16 +25,19 @@ import { VoteEditInputRowComponent } from '../vote-edit-input-row/vote-edit-inpu
 export class VoteEditModalComponent {
   public loadingCurrentUserVotes: boolean = true;
   public loadingPossibleDrivers: boolean = true;
-  public loadingModels: boolean = true;
   public saving: boolean = false;
-  public isNewModel: boolean = true;
-  public yearOptions: SelectItem<number>[];
-
+  /**
+   * All the currently displayed User Votes ( note: also contains unsaved votes after the user edited the form )
+   */
   public userVotes$: Observable<UserVote[]>;
-  public possibleDrivers$: Observable<Driver[]>;
+  /**
+   * The Drivers the user can vote for ( the ones that have a vote ARE disabled )
+   */
   public filteredDriverOptions$: Observable<SelectItem<Driver>[]>;
+  /**
+   * The Drivers the user can vote for ( the ones that have a vote ARE NOT disabled )
+   */
   public allDriverOptions$: Observable<SelectItem<Driver>[]>;
-
 
   protected data: {
     race: Race,
@@ -50,67 +51,15 @@ export class VoteEditModalComponent {
 
   constructor(dialogService: DialogService) {
     this.data = {...(dialogService.getInstance(this.dialogRef).data)};
-    this.yearOptions = this.yearsService.getYears().map((year: number) => ({
-      label: year + '',
-      value: year
-    }))
 
     this.userVotes$ = this.createUserVotes();
-    this.possibleDrivers$ = this.driverService.getDriversForYear(this.data.race.drivers_from_year).pipe(
+    const possibleDrivers$: Observable<Driver[]> = this.driverService.getDriversForYear(this.data.race.drivers_from_year).pipe(
       take(1),
       tap(() => { this.loadingPossibleDrivers = false; }),
       shareReplay(1)
     );
-    this.filteredDriverOptions$ = this.createFilteredDriverOptions(this.possibleDrivers$, this.userVotes$);
-    this.allDriverOptions$ = this.createAllDriverOptions(this.possibleDrivers$);
-  }
-
-  public getDriverVotedForPosition(position: number): Observable<Driver | null> {
-    return this.userVotes$.pipe(
-      map((votes: UserVote[]) => votes.find((vote: UserVote) => vote.driver_final_position === position)),
-      map((vote: UserVote | undefined) => vote?.driver ?? null),
-    )
-  }
-
-  public getDriverVotedForFastestLap(): Observable<Driver | null> {
-    return this.userVotes$.pipe(
-      map((votes: UserVote[]) => votes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)),
-      map((vote: UserVote | undefined) => vote?.driver ?? null),
-    )
-  }
-
-  public voteDriverForPosition(position: number, driver: Driver | null): void {
-    if (!driver) {
-      return;
-    }
-    const newVote: UserVote = {
-      driver: driver,
-      driver_final_position: position
-    };
-    const newUserVotes: UserVote[] = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.driver_final_position !== position);
-    newUserVotes.push(newVote);
-    this.updateNewUserVotes(newUserVotes);
-  }
-
-  public voteDriverForFastestLap(driver: Driver | null): void {
-    if (!driver) {
-      return;
-    }
-    const newVote: UserVote = {
-      driver: driver,
-      is_fastest_lap_vote: true
-    };
-    const newUserVotes: UserVote[] = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.is_fastest_lap_vote !== true);
-    newUserVotes.push(newVote);
-    this.updateNewUserVotes(newUserVotes);
-  }
-
-  /**
-   * returns a list of numbers starting from 1 up to the number of drivers ( max: 10 )
-   */
-  public getPositions(drivers: Driver[]): number[] {
-    const numberOfPositions: number = drivers.length < 10 ? drivers.length: 10;
-    return Array.from({length: numberOfPositions}, (_: unknown, i: number) => i + 1);
+    this.filteredDriverOptions$ = this.createFilteredDriverOptions(possibleDrivers$, this.userVotes$);
+    this.allDriverOptions$ = this.createAllDriverOptions(possibleDrivers$);
   }
 
   public onSubmit(): void {
@@ -134,7 +83,14 @@ export class VoteEditModalComponent {
     })
   }
 
-  protected updateNewUserVotes(newUserVotes: UserVote[]): void {
+  public onNewVote(newVote: UserVote): void {
+    let newUserVotes: UserVote[];
+    if (newVote.is_fastest_lap_vote) {
+      newUserVotes = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.is_fastest_lap_vote !== true);
+    } else {
+      newUserVotes = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.driver_final_position !== newVote.driver_final_position);
+    }
+    newUserVotes.push(newVote);
     this.newUserVotes$.next(newUserVotes);
   }
 
@@ -144,30 +100,34 @@ export class VoteEditModalComponent {
       this.newUserVotes$
     ]).pipe(
       map(([savedUserVotes, newUserVotes]: [UserVote[], UserVote[]]) => {
-        const ret: UserVote[] = [];
+        const votesToDisplay: UserVote[] = [];
         for (let driver_final_position: number = 1; driver_final_position <= 10; driver_final_position++) {
-          const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true);
-          if (newVote) {
-            ret.push(newVote);
-          } else {
-            const savedVote: UserVote | undefined = savedUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true)
-            if (savedVote) {
-              ret.push(savedVote);
-            }
+          const vote: UserVote | undefined = this.findNormalVoteToDisplayByPosition(newUserVotes, savedUserVotes, driver_final_position);
+          if (vote) {
+            votesToDisplay.push(vote);
           }
         }
-        const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true);
-        if (newVote) {
-          ret.push(newVote);
-        } else {
-          const savedVote: UserVote | undefined = savedUserVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)
-          if (savedVote) {
-            ret.push(savedVote);
-          }
+        const fastestLapVote: UserVote | undefined = this.findFastestLapVoteTiDisplay(newUserVotes, savedUserVotes);
+        if (fastestLapVote) {
+          votesToDisplay.push(fastestLapVote);
         }
-        return ret;
+        return votesToDisplay;
       }),
       shareReplay(1)
+    );
+  }
+
+  protected findNormalVoteToDisplayByPosition(newVotes: UserVote[], oldVotes: UserVote[], driver_final_position: number): UserVote | undefined {
+    return (
+      newVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true) ||
+      oldVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true)
+    );
+  }
+
+  protected findFastestLapVoteTiDisplay(newVotes: UserVote[], oldVotes: UserVote[]): UserVote | undefined {
+    return (
+      newVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true) ||
+      oldVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)
     );
   }
 
