@@ -64,6 +64,9 @@ export class UserService {
       return () => {
         data.subscription.unsubscribe();
       }
-    }).pipe(shareReplay(1));
+    }).pipe(shareReplay({
+      bufferSize: 1,
+      refCount: true
+    }));
   }
 }

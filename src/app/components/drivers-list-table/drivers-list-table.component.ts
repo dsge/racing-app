@@ -5,16 +5,20 @@ import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { Observable, Subject, finalize, of, startWith, switchMap, take, tap } from 'rxjs';
 import { Driver } from '../../models/driver.model';
 import { CommonModule } from '@angular/common';
-import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DriverEditModalComponent } from '../driver-edit-modal/driver-edit-modal.component';
+import { ModalService } from '../../services/modal.service';
+import { AppConfirmationService } from '../../services/confirmation.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-drivers-list-table',
   standalone: true,
   imports: [TableModule, CommonModule, ConfirmPopupModule, ButtonModule],
-  providers: [ConfirmationService, DialogService],
+  providers: [
+    { provide: ConfirmationService, useExisting: AppConfirmationService }
+  ],
   templateUrl: './drivers-list-table.component.html',
   styleUrl: './drivers-list-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,8 +30,8 @@ export class DriversListTableComponent implements OnInit {
   public loading: boolean = false;
 
   protected driverService: DriverService = inject(DriverService);
-  protected confirmationService: ConfirmationService = inject(ConfirmationService);
-  protected dialogService: DialogService = inject(DialogService);
+  protected confirmationService: AppConfirmationService = inject(AppConfirmationService);
+  protected modalService: ModalService = inject(ModalService);
   protected refreshTrigger: Subject<void> = new Subject<void>();
 
   public ngOnInit(): void {
@@ -35,11 +39,11 @@ export class DriversListTableComponent implements OnInit {
       this.drivers$ = this.refreshTrigger
         .pipe(
           startWith(null),
+          tap(() => {
+            this.loading = true;
+          }),
           switchMap(() => this.driverService.getDriversForYear(this.year!).pipe(
             take(1),
-            tap(() => {
-              this.loading = true;
-            }),
             finalize(() => {
               this.loading = false;
             })
@@ -80,8 +84,8 @@ export class DriversListTableComponent implements OnInit {
     this.openDialog('Edit Driver', driver);
   }
 
-  protected openDialog(headerText: string = '', driver?: Driver): void {
-    const dialogRef: DynamicDialogRef = this.dialogService.open(
+  protected openDialog(headerText: string, driver?: Driver): void {
+    const dialogRef: DynamicDialogRef = this.modalService.open(
       DriverEditModalComponent,
       {
         header: headerText,
