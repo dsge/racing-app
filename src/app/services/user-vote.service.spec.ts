@@ -6,7 +6,7 @@ import { ReplaySubject, of, take } from 'rxjs';
 import { UserService } from './user.service';
 import { Race } from '../models/race.model';
 import { UserVote } from '../models/user-vote.model';
-import { User } from '@supabase/supabase-js';
+import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
 import { DriverService } from './driver.service';
 import { Driver } from '../models/driver.model';
 
@@ -68,4 +68,42 @@ describe('UserVoteService', () => {
       supabaseApiResponse$.next(Response.json({ error: {} }, { status: 400 }));
     })
   })
+
+  describe('setUserVotes', () => {
+    it('should return null when called without a logged in user', (done: DoneFn) => {
+      userService.getUser = jasmine.createSpy().and.returnValue(of(null));
+      service.setUserVotes({} as Race, []).pipe(take(1)).subscribe((value: PostgrestSingleResponse<unknown> | null) => {
+        expect(value).toBeNull();
+        done();
+      });
+    });
+    it('should remove previous votes', () => {
+      userService.getUser = jasmine.createSpy().and.returnValue(of({ id: 'foo1122'} as User));
+      const spy: jasmine.Spy = jasmine.createSpy().and.returnValue(of(null));
+      service['removePreviousVotes'] = spy;
+      service.setUserVotes({} as Race, []).pipe(take(1)).subscribe();
+      expect(spy).toHaveBeenCalledTimes(1);
+    })
+    it('should return a non null reponse on successful inserts', (done: DoneFn) => {
+      userService.getUser = jasmine.createSpy().and.returnValue(of({ id: 'foo1122'} as User));
+      service.setUserVotes({} as Race, [
+        {
+          race: {} as Race,
+          driver_final_position: 2,
+          driver: {id : 556} as Driver
+        },
+        {
+          race: {} as Race,
+          is_fastest_lap_vote: true,
+          driver: {id : 556} as Driver
+        }
+      ]).pipe(take(1)).subscribe((value: PostgrestSingleResponse<unknown> | null) => {
+        expect(value).not.toBeNull();
+        done();
+      });
+      supabaseApiResponse$.next(Response.json({})); // DELETE response
+      supabaseApiResponse$.next(Response.json({})); // INSERT response
+
+    })
+  });
 });
