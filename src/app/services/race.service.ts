@@ -63,7 +63,7 @@ export class RaceService {
 
   public getUpcomingRaces(now: Date = new Date()): Observable<Race[]> {
     const todaysDate: string = format(now, 'yyyy-MM-dd');
-    return from(this.supabaseClient
+    return this.addCurrentUserHasVotedField(from(this.supabaseClient
         .from('races')
         .select()
         .gt('race_start_date', todaysDate)
@@ -71,7 +71,8 @@ export class RaceService {
       )
       .pipe(
         map((res: PostgrestSingleResponse<Race[]>) => res.data ?? [])
-      );
+      )
+    );
   }
 
   public getRecentRaces(now: Date = new Date()): Observable<Race[]> {
@@ -109,15 +110,6 @@ export class RaceService {
       .returns<Race[]>()
     ).pipe(
       map((res: PostgrestSingleResponse<Race[]>) => res.data ?? [])
-    );
-  }
-
-  protected getRaces(): Observable<Race[]> {
-    return this.addCurrentUserHasVotedField(
-      from(this.supabaseClient.from('races').select().returns<Race[]>())
-        .pipe(
-          map((res: PostgrestSingleResponse<Race[]>) => res.data ?? [])
-        )
     );
   }
 

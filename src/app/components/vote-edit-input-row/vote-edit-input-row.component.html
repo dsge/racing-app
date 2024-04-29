@@ -1,17 +1,24 @@
 <div class="grid">
   <div class="col-4">
-    <label [attr.for]="'vote' + position">Vote for position #{{ position }}</label>
+    <label [attr.for]="'vote' + getId()">
+      <ng-container *ngIf="isFastestLapVote">
+        Vote for fastest lap
+      </ng-container>
+      <ng-container *ngIf="!isFastestLapVote">
+        Vote for position #{{ getId() }}
+      </ng-container>
+    </label>
   </div>
   <div class="col-8">
     <ng-container>
       <p-dropdown
-        [attr.id]="'vote' + position"
-        [name]="'vote' + position"
+        [attr.id]="'vote' + getId()"
+        [name]="'vote' + getId()"
         [options]="dropdownOptions ?? []"
         [ngModel]="value"
         (ngModelChange)="valueChange.emit($event)"
         [showClear]="true"
-        [placeholder]="'Select a Driver for position #' + position"
+        [placeholder]="isFastestLapVote ? 'Select a Driver for fastest lap' : 'Select a Driver for position #' + getId()"
         [required]="true"
         appendTo="body"
         [style]="{'width':'100%'}"

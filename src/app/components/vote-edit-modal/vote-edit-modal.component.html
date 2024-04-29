@@ -14,11 +14,20 @@
         <app-vote-edit-input-row
           [value]="getDriverVotedForPosition(position) | async"
           (valueChange)="voteDriverForPosition(position, $event)"
-          [dropdownOptions]="driverOptions$ | async"
+          [dropdownOptions]="filteredDriverOptions$ | async"
           [position]="position"
         ></app-vote-edit-input-row>
       </div>
     </ng-container>
+
+    <div class="field">
+      <app-vote-edit-input-row
+        [value]="getDriverVotedForFastestLap() | async"
+        (valueChange)="voteDriverForFastestLap($event)"
+        [dropdownOptions]="allDriverOptions$ | async"
+        [isFastestLapVote]="true"
+      ></app-vote-edit-input-row>
+    </div>
 
     <p-button
       type="submit"

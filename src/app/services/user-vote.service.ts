@@ -75,7 +75,8 @@ export class UserVoteService {
         user_uuid: user.id,
         race_id: race.id,
         driver_id: vote.driver.id,
-        driver_final_position: vote.driver_final_position
+        driver_final_position: vote.is_fastest_lap_vote ? -1 : vote.driver_final_position,
+        is_fastest_lap_vote: !!vote.is_fastest_lap_vote
       }
     })
   }
@@ -102,6 +103,7 @@ export class UserVoteService {
         return {
           id: voteRecord.id,
           driver_final_position: voteRecord.driver_final_position,
+          is_fastest_lap_vote: voteRecord.is_fastest_lap_vote,
           user_uuid: voteRecord.user_uuid,
           driver: driver
         }

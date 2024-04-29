@@ -34,7 +34,8 @@ export class VoteEditModalComponent {
 
   public userVotes$: Observable<UserVote[]>;
   public possibleDrivers$: Observable<Driver[]>;
-  public driverOptions$: Observable<SelectItem<Driver>[]>;
+  public filteredDriverOptions$: Observable<SelectItem<Driver>[]>;
+  public allDriverOptions$: Observable<SelectItem<Driver>[]>;
 
 
   protected data: {
@@ -60,12 +61,20 @@ export class VoteEditModalComponent {
       tap(() => { this.loadingPossibleDrivers = false; }),
       shareReplay(1)
     );
-    this.driverOptions$ = this.createDriverOptions(this.possibleDrivers$, this.userVotes$);
+    this.filteredDriverOptions$ = this.createFilteredDriverOptions(this.possibleDrivers$, this.userVotes$);
+    this.allDriverOptions$ = this.createAllDriverOptions(this.possibleDrivers$);
   }
 
   public getDriverVotedForPosition(position: number): Observable<Driver | null> {
     return this.userVotes$.pipe(
       map((votes: UserVote[]) => votes.find((vote: UserVote) => vote.driver_final_position === position)),
+      map((vote: UserVote | undefined) => vote?.driver ?? null),
+    )
+  }
+
+  public getDriverVotedForFastestLap(): Observable<Driver | null> {
+    return this.userVotes$.pipe(
+      map((votes: UserVote[]) => votes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)),
       map((vote: UserVote | undefined) => vote?.driver ?? null),
     )
   }
@@ -80,7 +89,20 @@ export class VoteEditModalComponent {
     };
     const newUserVotes: UserVote[] = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.driver_final_position !== position);
     newUserVotes.push(newVote);
-    this.newUserVotes$.next(newUserVotes);
+    this.updateNewUserVotes(newUserVotes);
+  }
+
+  public voteDriverForFastestLap(driver: Driver | null): void {
+    if (!driver) {
+      return;
+    }
+    const newVote: UserVote = {
+      driver: driver,
+      is_fastest_lap_vote: true
+    };
+    const newUserVotes: UserVote[] = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.is_fastest_lap_vote !== true);
+    newUserVotes.push(newVote);
+    this.updateNewUserVotes(newUserVotes);
   }
 
   /**
@@ -112,6 +134,10 @@ export class VoteEditModalComponent {
     })
   }
 
+  protected updateNewUserVotes(newUserVotes: UserVote[]): void {
+    this.newUserVotes$.next(newUserVotes);
+  }
+
   protected createUserVotes(): Observable<UserVote[]> {
     return combineLatest([
       this.userVoteService.getUserVotes(this.data.race).pipe(tap(() => { this.loadingCurrentUserVotes = false; })),
@@ -120,14 +146,23 @@ export class VoteEditModalComponent {
       map(([savedUserVotes, newUserVotes]: [UserVote[], UserVote[]]) => {
         const ret: UserVote[] = [];
         for (let driver_final_position: number = 1; driver_final_position <= 10; driver_final_position++) {
-          const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position);
+          const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true);
           if (newVote) {
             ret.push(newVote);
           } else {
-            const savedVote: UserVote | undefined = savedUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position)
+            const savedVote: UserVote | undefined = savedUserVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true)
             if (savedVote) {
               ret.push(savedVote);
             }
+          }
+        }
+        const newVote: UserVote | undefined = newUserVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true);
+        if (newVote) {
+          ret.push(newVote);
+        } else {
+          const savedVote: UserVote | undefined = savedUserVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)
+          if (savedVote) {
+            ret.push(savedVote);
           }
         }
         return ret;
@@ -136,17 +171,26 @@ export class VoteEditModalComponent {
     );
   }
 
-  protected createDriverOptions(possibleDrivers$: Observable<Driver[]>, userVotes$: Observable<UserVote[]>): Observable<SelectItem<Driver>[]> {
+  protected createFilteredDriverOptions(possibleDrivers$: Observable<Driver[]>, userVotes$: Observable<UserVote[]>): Observable<SelectItem<Driver>[]> {
     return combineLatest([possibleDrivers$, userVotes$]).pipe(
-      map(([drivers, userVotes]: [Driver[], UserVote[]]) => drivers.map((driver: Driver) => {
-          return {
+      map(([drivers, userVotes]: [Driver[], UserVote[]]) => drivers.map((driver: Driver) => ({
             label: driver.full_name,
             disabled: !!userVotes.find((userVote: UserVote) => userVote.driver.id === driver.id),
             value: driver
-          } as SelectItem<Driver>
-        }
+          } as SelectItem<Driver>)
+        )
       )
+    );
+  }
 
+  protected createAllDriverOptions(possibleDrivers$: Observable<Driver[]>): Observable<SelectItem<Driver>[]> {
+    return possibleDrivers$.pipe(
+      map((drivers: Driver[]) => drivers.map((driver: Driver) => ({
+            label: driver.full_name,
+            disabled: false,
+            value: driver
+          } as SelectItem<Driver>)
+        )
       )
     );
   }
