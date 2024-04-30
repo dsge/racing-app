@@ -10,6 +10,7 @@
 
 In repo root:
 
+- `corepack enable`
 - `yarn`
 
 ## Running
