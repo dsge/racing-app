@@ -53,6 +53,7 @@ export class RaceService {
           .select()
           .lte('race_start_date', todaysDate)
           .gte('race_end_date', todaysDate)
+          .order('race_end_date', { ascending: true })
           .returns<Race[]>()
         )
         .pipe(
@@ -67,6 +68,7 @@ export class RaceService {
         .from('races')
         .select()
         .gt('race_start_date', todaysDate)
+        .order('race_end_date', { ascending: true })
         .returns<Race[]>()
       )
       .pipe(
@@ -83,6 +85,7 @@ export class RaceService {
         .select()
         .gt('race_end_date', pastOneMonthDate)
         .lt('race_end_date', todaysDate)
+        .order('race_end_date', { ascending: true })
         .returns<Race[]>()
       )
       .pipe(
@@ -107,6 +110,7 @@ export class RaceService {
       .select()
       .gte('race_end_date', startOfYear)
       .lte('race_end_date', endDate)
+      .order('race_end_date', { ascending: true })
       .returns<Race[]>()
     ).pipe(
       map((res: PostgrestSingleResponse<Race[]>) => res.data ?? [])
