@@ -6,6 +6,8 @@ import { PostgrestSingleResponse, SupabaseClient, User } from '@supabase/supabas
 import { UserService } from './user.service';
 import { YearsService } from './years.service';
 import { SUPABASE_CLIENT } from '../tokens/supabase-client';
+import { UserVote } from '../models/user-vote.model';
+import { UserVoteService } from './user-vote.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +17,7 @@ export class RaceService {
   protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userService: UserService = inject(UserService);
   protected yearsService: YearsService = inject(YearsService);
+  protected userVoteService: UserVoteService = inject(UserVoteService);
 
   public hasUserVoted(race: Race): Observable<boolean> {
     return of(race.current_user_has_voted ?? false);
@@ -43,6 +46,21 @@ export class RaceService {
 
   public deleteRace(model: Race): Observable<PostgrestSingleResponse<null>> {
     return from(this.supabaseClient.from('races').delete().eq('id', model.id));
+  }
+
+  public getRaceById(id: number | string): Observable<Race | undefined> {
+    return from(this.supabaseClient.from('races').select().match({'id': id}).returns<Race[]>())
+      .pipe(
+        map((res: { data: Race[] | null }) => res.data?.[0] ?? undefined)
+      )
+  }
+
+  public setRaceFinalResults(model: Race, finalResults: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> {
+    return this.userVoteService.setRaceFinalResults(model, finalResults);
+  }
+
+  public getRaceFinalResults(model: Race): Observable<UserVote[]> {
+    return this.userVoteService.getRaceFinalResults(model);
   }
 
   public getOngoingRaces(now: Date = new Date()): Observable<Race[]> {

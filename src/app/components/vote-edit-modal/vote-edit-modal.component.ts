@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { SelectItem } from 'primeng/api';
-import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { take, tap, finalize, Observable, shareReplay, map, combineLatest, BehaviorSubject, switchMap } from 'rxjs';
 import { Race } from '../../models/race.model';
 import { ToastService } from '../../services/toast.service';
@@ -13,6 +13,8 @@ import { Driver } from '../../models/driver.model';
 import { DriverService } from '../../services/driver.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { VoteEditFormComponent } from '../vote-edit-form/vote-edit-form.component';
+import { RaceService } from '../../services/race.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-vote-edit-modal',
@@ -41,15 +43,17 @@ export class VoteEditModalComponent {
 
   protected data: {
     race: Race,
+    editingFinalResults: boolean,
   };
   protected userVoteService: UserVoteService = inject(UserVoteService);
   protected dialogRef: DynamicDialogRef = inject(DynamicDialogRef);
   protected toastService: ToastService = inject(ToastService);
   protected yearsService: YearsService = inject(YearsService);
   protected driverService: DriverService = inject(DriverService);
+  protected raceService: RaceService = inject(RaceService);
   protected newUserVotes$: BehaviorSubject<UserVote[]> = new BehaviorSubject<UserVote[]>([]);
 
-  constructor(dialogService: DialogService) {
+  constructor(dialogService: ModalService) {
     this.data = {...(dialogService.getInstance(this.dialogRef).data)};
 
     this.userVotes$ = this.createUserVotes();
@@ -62,11 +66,19 @@ export class VoteEditModalComponent {
     this.allDriverOptions$ = this.createAllDriverOptions(possibleDrivers$);
   }
 
+  public editingFinalResults(): boolean {
+    return !!this.data?.editingFinalResults;
+  }
+
   public onSubmit(): void {
     this.userVotes$.pipe(
-      switchMap((userVotes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> =>
-        this.userVoteService.setUserVotes(this.data.race!, userVotes)
-      ),
+      switchMap((userVotes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> => {
+        if (this.editingFinalResults()) {
+          return this.raceService.setRaceFinalResults(this.data.race!, userVotes);
+        } else {
+          return this.userVoteService.setUserVotes(this.data.race!, userVotes)
+        }
+      }),
       take(1),
       tap(() => { this.saving = true; }),
       finalize(() => { this.saving = false; })

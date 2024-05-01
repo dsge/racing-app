@@ -1,1 +1,17 @@
-<p>race-results-page works!</p>
+<ng-container *ngIf="model$ | async as model; else notFound">
+
+
+
+  <div class="grid">
+    <div class="col-10">
+      Race: {{ model | json }}
+    </div>
+    <div class="col-2">
+      <p-button (click)="openEditFinalResultsDialog(model)" label="Edit Final Results" severity="primary" [disabled]="!currentUserIsModerator()"></p-button>
+    </div>
+  </div>
+
+</ng-container>
+
+<ng-template #notFound>Not found</ng-template>
+

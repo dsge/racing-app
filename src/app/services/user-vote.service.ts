@@ -16,22 +16,36 @@ export class UserVoteService {
   protected userService: UserService = inject(UserService);
   protected driverService: DriverService = inject(DriverService);
 
-  public getUserVotes(race: Race): Observable<UserVote[]> {
+  public getUserVotes(race: Race, is_final_result: boolean = false): Observable<UserVote[]> {
     return this.userService.getUser().pipe(
       take(1),
       switchMap((user: User | null) => {
         if (!user) {
           return of([]);
         }
-        return from(
-          this.supabaseClient
-            .from('user_votes')
-            .select('*')
-            .eq('user_uuid', user.id)
-            .eq('race_id', race.id)
-            .returns<UserVoteRecord[]>()
-        )
-          .pipe(
+        let observable$: Observable<PostgrestSingleResponse<UserVoteRecord[]>>;
+        if (is_final_result) {
+          observable$ = from(
+            this.supabaseClient
+              .from('user_votes')
+              .select('*')
+              .eq('is_final_result', true)
+              .eq('race_id', race.id)
+              .returns<UserVoteRecord[]>()
+          );
+        } else {
+          observable$ = from(
+            this.supabaseClient
+              .from('user_votes')
+              .select('*')
+              .eq('user_uuid', user.id)
+              .neq('is_final_result', true)
+              .eq('race_id', race.id)
+              .returns<UserVoteRecord[]>()
+          );
+        }
+
+        return observable$.pipe(
             map((res: PostgrestSingleResponse<UserVoteRecord[]>) => res.data ?? []),
             switchMap((userVoteRecords: UserVoteRecord[]) => this.userVoteRecordsToUserVotes(userVoteRecords))
           )
@@ -39,7 +53,7 @@ export class UserVoteService {
     );
   }
 
-  public setUserVotes(race: Race, votes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> {
+  public setUserVotes(race: Race, votes: UserVote[], is_final_result: boolean = false): Observable<PostgrestSingleResponse<unknown> | null> {
     return this.userService.getUser().pipe(
       take(1),
       switchMap((user: User | null) => {
@@ -50,13 +64,21 @@ export class UserVoteService {
             switchMap(() => from(
                 this.supabaseClient
                   .from('user_votes')
-                  .insert(this.raceAndVotesToRecords(race, votes, user))
+                  .insert(this.raceAndVotesToRecords(race, votes, user, is_final_result))
                   .returns()
               )
             )
           )
       })
     );
+  }
+
+  public setRaceFinalResults(model: Race, finalResults: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> {
+    return this.setUserVotes(model, finalResults, true);
+  }
+
+  public getRaceFinalResults(model: Race): Observable<UserVote[]> {
+    return this.getUserVotes(model, true);
   }
 
   protected removePreviousVotes(race: Race, user: User): Observable<PostgrestSingleResponse<unknown>> {
@@ -69,14 +91,15 @@ export class UserVoteService {
     );
   }
 
-  protected raceAndVotesToRecords(race: Race, votes: UserVote[], user: User): UserVoteRecord[] {
+  protected raceAndVotesToRecords(race: Race, votes: UserVote[], user: User, is_final_result: boolean = false): UserVoteRecord[] {
     return votes.map((vote: UserVote) => {
       return {
         user_uuid: user.id,
         race_id: race.id,
         driver_id: vote.driver.id,
         driver_final_position: vote.is_fastest_lap_vote ? -1 : vote.driver_final_position,
-        is_fastest_lap_vote: !!vote.is_fastest_lap_vote
+        is_fastest_lap_vote: !!vote.is_fastest_lap_vote,
+        is_final_result: !!is_final_result
       }
     })
   }

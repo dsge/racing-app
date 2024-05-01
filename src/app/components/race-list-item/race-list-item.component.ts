@@ -7,18 +7,18 @@ import { Observable, finalize, take } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { RaceService } from '../../services/race.service';
 import { RaceEditModalComponent } from '../race-edit-modal/race-edit-modal.component';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { formatDistance } from 'date-fns';
 import { RouterModule } from '@angular/router';
 import { VoteEditModalComponent } from '../vote-edit-modal/vote-edit-modal.component';
 import { BadgeModule } from 'primeng/badge';
+import { ModalService } from '../../services/modal.service';
 
 
 @Component({
   selector: 'app-race-list-item',
   standalone: true,
   imports: [CommonModule, CardModule, ButtonModule, RouterModule, BadgeModule],
-  providers: [DialogService],
   templateUrl: './race-list-item.component.html',
   styleUrl: './race-list-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,7 +31,7 @@ export class RaceListItemComponent {
 
   protected userService: UserService = inject(UserService);
   protected raceService: RaceService = inject(RaceService);
-  protected dialogService: DialogService = inject(DialogService);
+  protected dialogService: ModalService = inject(ModalService);
 
   public currentUserIsModerator(): Observable<boolean> {
     return this.userService.isModerator();
