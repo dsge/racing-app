@@ -1,4 +1,4 @@
-import { Driver } from "./driver.model";
+import { UserVote, UserVoteRecord } from './user-vote.model';
 
 export interface Race {
   id?: number;
@@ -27,7 +27,20 @@ export interface VoteAndRaceRecordBase {
 
 export interface RaceFinalResultRecord extends VoteAndRaceRecordBase {}
 
-export interface RaceFinalResult extends Pick<RaceFinalResultRecord, 'id' | 'driver_final_position'> {
-  race?: Race,
-  driver: Driver,
+export interface UserProfile {
+  id?: string,
+  display_name: string
+}
+
+/**
+ * Contains all the users and their votes, and also the final result of the race if we know it already
+ */
+export interface RaceScoreScreenVotes {
+  raceFinalResults?: UserVote[],
+  userVotes: RaceScoreScreenVote[]
+}
+
+export interface RaceScoreScreenVote {
+  user?: UserProfile,
+  votes: UserVoteRecord[]
 }

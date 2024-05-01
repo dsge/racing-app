@@ -107,8 +107,15 @@ export class VoteEditModalComponent {
   }
 
   protected createUserVotes(): Observable<UserVote[]> {
+    let savedVotesToEdit$: Observable<UserVote[]>;
+    if (this.editingFinalResults()) {
+      savedVotesToEdit$ = this.raceService.getRaceFinalResults(this.data.race);
+    } else {
+      savedVotesToEdit$ = this.userVoteService.getUserVotes(this.data.race)
+    }
+
     return combineLatest([
-      this.userVoteService.getUserVotes(this.data.race).pipe(tap(() => { this.loadingCurrentUserVotes = false; })),
+      savedVotesToEdit$.pipe(tap(() => { this.loadingCurrentUserVotes = false; })),
       this.newUserVotes$
     ]).pipe(
       map(([savedUserVotes, newUserVotes]: [UserVote[], UserVote[]]) => {

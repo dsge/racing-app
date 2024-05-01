@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Race } from '../../models/race.model';
 import { RaceService } from '../../services/race.service';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ToastService } from '../../services/toast.service';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { Observable, take, tap, finalize } from 'rxjs';
@@ -15,6 +15,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { format, parseISO } from 'date-fns';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
+import { ModalService } from '../../services/modal.service';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class RaceEditModalComponent implements OnInit {
   protected toastService: ToastService = inject(ToastService);
   protected yearsService: YearsService = inject(YearsService);
 
-  constructor(dialogService: DialogService) {
+  constructor(dialogService: ModalService) {
     this.data = {...(dialogService.getInstance(this.dialogRef).data)};
     this.yearOptions = this.yearsService.getYears().map((year: number) => ({
       label: year + '',

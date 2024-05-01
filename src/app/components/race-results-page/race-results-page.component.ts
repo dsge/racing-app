@@ -8,11 +8,15 @@ import { VoteEditModalComponent } from '../vote-edit-modal/vote-edit-modal.compo
 import { ActivatedRoute, Data } from '@angular/router';
 import { ModalService } from '../../services/modal.service';
 import { UserService } from '../../services/user.service';
+import { BadgeModule } from 'primeng/badge';
+import { RaceService } from '../../services/race.service';
+import { ResultsPageContentsComponent } from '../results-page-contents/results-page-contents.component';
+import { ScoreScreenService } from '../../services/score-screen.service';
 
 @Component({
   selector: 'app-race-results-page',
   standalone: true,
-  imports: [CommonModule, ButtonModule],
+  imports: [CommonModule, ButtonModule, BadgeModule, ResultsPageContentsComponent],
   templateUrl: './race-results-page.component.html',
   styleUrl: './race-results-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,15 +26,25 @@ export class RaceResultsPageComponent {
   public model$: Observable<Race>;
   protected dialogService: ModalService = inject(ModalService);
   protected userService: UserService = inject(UserService);
+  protected raceService: RaceService = inject(RaceService);
+  protected scoreScreenService: ScoreScreenService = inject(ScoreScreenService);
   protected activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   protected refreshTrigger$: Subject<void> = new Subject<void>();
 
   constructor() {
     this.model$ = this.activatedRoute.data.pipe(map((data: Data) => data['race']));
+
+    this.model$.subscribe((model: Race) => {
+      this.scoreScreenService.getRaceScoreScreenVotes(model);
+    })
   }
 
   public currentUserIsModerator(): Observable<boolean> {
     return this.userService.isModerator();
+  }
+
+  public hasVotingEnded(race: Race, now: Date = new Date()): boolean {
+    return this.raceService.hasVotingEnded(race, now);
   }
 
   public openEditFinalResultsDialog(model: Race): void {
