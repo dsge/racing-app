@@ -10,7 +10,7 @@
     </div>
   </ng-container>
 
-  <div class="field">
+  <div class="field" *ngIf="!is_sprint_race">
     <app-vote-edit-input-row
       [value]="getDriverVotedForFastestLap()"
       (valueChange)="voteDriverForFastestLap($event)"

@@ -11,12 +11,13 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { formatDistance } from 'date-fns';
 import { RouterModule } from '@angular/router';
 import { VoteEditModalComponent } from '../vote-edit-modal/vote-edit-modal.component';
+import { BadgeModule } from 'primeng/badge';
 
 
 @Component({
   selector: 'app-race-list-item',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, RouterModule],
+  imports: [CommonModule, CardModule, ButtonModule, RouterModule, BadgeModule],
   providers: [DialogService],
   templateUrl: './race-list-item.component.html',
   styleUrl: './race-list-item.component.scss',

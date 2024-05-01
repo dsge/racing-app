@@ -76,6 +76,19 @@
           ></p-calendar>
         </div>
 
+        <p-checkbox name="is_sprint_race" [binary]="true" label="Is Sprint Race?" [(ngModel)]="data.model.is_sprint_race"></p-checkbox>
+        &nbsp;
+        <i
+          class="pi pi-info-circle cursor-pointer"
+          pTooltip="Note: Sprint races are limited to voting for the first 8 places only, with no voting for Fastest Lap.<br />
+            As such, changing this field after some players have voted will lead to inconsistent database states.
+          "
+          [escape]="false"
+          appendTo="body"
+          [fitContent]="true"
+        >
+        </i>
+
         <p-button
           type="submit"
           [label]="isNewModel ? 'Add new Race' : 'Update Race'"
