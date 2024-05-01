@@ -11,7 +11,14 @@ export class DriverService {
   protected readonly supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
 
   public getDriversForYear(year: number): Observable<Driver[]> {
-    return from(this.supabaseClient.from('drivers').select().match({'year_of_racing': year + ''}).returns<Driver[]>())
+    return from(
+        this.supabaseClient.
+        from('drivers').
+        select()
+          .match({'year_of_racing': year + ''})
+          .order('full_name', { ascending: true })
+          .returns<Driver[]>()
+      )
       .pipe(
         map((res: { data: Driver[] | null }) => res.data ?? [])
       )
