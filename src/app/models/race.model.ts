@@ -10,6 +10,7 @@ export interface Race {
   race_start_date: string;
   race_end_date: string;
   voting_end_time?: string;
+  is_sprint_race?: boolean;
   /**
    * has the currently logged in user voted for this race already
    */

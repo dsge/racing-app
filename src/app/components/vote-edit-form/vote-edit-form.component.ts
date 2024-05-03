@@ -22,6 +22,7 @@ export class VoteEditFormComponent {
   @Input() allDriverOptions: SelectItem<Driver>[] | null = null;
   @Input() filteredDriverOptions: SelectItem<Driver>[] | null = null;
   @Input() saving: boolean = false;
+  @Input() is_sprint_race: boolean = false;
 
   public getDriverVotedForPosition(position: number): Driver | null {
     const vote: UserVote | undefined = this.userVotes?.find((vote: UserVote) => vote.driver_final_position === position);
@@ -52,10 +53,11 @@ export class VoteEditFormComponent {
   }
 
   /**
-   * returns a list of numbers starting from 1 up to the number of drivers ( max: 10 )
+   * returns a list of numbers starting from 1 up to the number of drivers ( max: 10 for normal races, 8 for sprint races )
    */
   public getPositions(): number[] {
-    const numberOfPositions: number = (this.allDriverOptions ?? []).length < 10 ? (this.allDriverOptions ?? []).length: 10;
+    const maxPositions: number = this.is_sprint_race ? 8 : 10;
+    const numberOfPositions: number = (this.allDriverOptions ?? []).length < maxPositions ? (this.allDriverOptions ?? []).length: maxPositions;
     return Array.from({length: numberOfPositions}, (_: unknown, i: number) => i + 1);
   }
 

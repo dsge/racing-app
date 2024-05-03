@@ -13,13 +13,14 @@ import { YearsService } from '../../services/years.service';
 import { SelectItem } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
 import { format, parseISO } from 'date-fns';
-
+import { CheckboxModule } from 'primeng/checkbox';
+import { TooltipModule } from 'primeng/tooltip';
 
 
 @Component({
   selector: 'app-race-edit-modal',
   standalone: true,
-  imports: [FormsModule, CommonModule, ButtonModule, DropdownModule, CalendarModule],
+  imports: [FormsModule, CommonModule, ButtonModule, DropdownModule, CalendarModule, CheckboxModule, TooltipModule],
   templateUrl: './race-edit-modal.component.html',
   styleUrl: './race-edit-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

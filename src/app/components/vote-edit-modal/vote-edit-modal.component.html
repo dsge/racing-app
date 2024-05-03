@@ -16,6 +16,7 @@
     [allDriverOptions]="allDriverOptions ?? []"
     [filteredDriverOptions]="filteredDriverOptions ?? []"
     [saving]="saving"
+    [is_sprint_race]="!!data.race?.is_sprint_race"
     (formSubmit)="onSubmit()"
     (newVote)="onNewVote($event)"
   ></app-vote-edit-form>

@@ -3,7 +3,10 @@
     <ng-template pTemplate="header">
       <div class="grid">
         <div class="col-9">
-          <div class="p-card-title"> {{ model.race_name }} </div>
+          <div class="p-card-title">
+            {{ model.race_name }}
+            <p-badge value="Sprint race" severity="danger" *ngIf="model.is_sprint_race"></p-badge>
+          </div>
           <div class="p-card-subtitle ng-star-inserted"> {{ model.race_start_date | date }} - {{ model.race_end_date | date }} </div>
         </div>
         <div class="col-3">
