@@ -1,8 +1,23 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { DriverService } from '../../services/driver.service';
 import { TableModule } from 'primeng/table';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
-import { Observable, Subject, finalize, of, startWith, switchMap, take, tap } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  finalize,
+  of,
+  startWith,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs';
 import { Driver } from '../../models/driver.model';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -17,11 +32,11 @@ import { ConfirmationService } from 'primeng/api';
   standalone: true,
   imports: [TableModule, CommonModule, ConfirmPopupModule, ButtonModule],
   providers: [
-    { provide: ConfirmationService, useExisting: AppConfirmationService }
+    { provide: ConfirmationService, useExisting: AppConfirmationService },
   ],
   templateUrl: './drivers-list-table.component.html',
   styleUrl: './drivers-list-table.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DriversListTableComponent implements OnInit {
   @Input() public year: number | null = null;
@@ -30,35 +45,40 @@ export class DriversListTableComponent implements OnInit {
   public loading: boolean = false;
 
   protected driverService: DriverService = inject(DriverService);
-  protected confirmationService: AppConfirmationService = inject(AppConfirmationService);
+  protected confirmationService: AppConfirmationService = inject(
+    AppConfirmationService
+  );
   protected modalService: ModalService = inject(ModalService);
   protected refreshTrigger: Subject<void> = new Subject<void>();
 
   public ngOnInit(): void {
     if (this.year) {
-      this.drivers$ = this.refreshTrigger
-        .pipe(
-          startWith(null),
-          tap(() => {
-            this.loading = true;
-          }),
-          switchMap(() => this.driverService.getDriversForYear(this.year!).pipe(
+      this.drivers$ = this.refreshTrigger.pipe(
+        startWith(null),
+        tap(() => {
+          this.loading = true;
+        }),
+        switchMap(() =>
+          this.driverService.getDriversForYear(this.year!).pipe(
             take(1),
             finalize(() => {
               this.loading = false;
             })
-          ))
-        );
+          )
+        )
+      );
     }
   }
 
   public onDeleteDriverButtonClick(event: Event, driver: Driver): void {
     this.confirmationService.confirm({
-        target: event.target as EventTarget,
-        message: 'Are you sure you want to proceed?',
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => {
-          this.driverService.deleteDriver(driver).pipe(
+      target: event.target as EventTarget,
+      message: 'Are you sure you want to proceed?',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.driverService
+          .deleteDriver(driver)
+          .pipe(
             take(1),
             tap(() => {
               this.loading = true;
@@ -66,13 +86,12 @@ export class DriversListTableComponent implements OnInit {
             finalize(() => {
               this.loading = false;
             })
-          ).subscribe(() => {
+          )
+          .subscribe(() => {
             this.refreshTrigger.next();
-          })
-        },
-        reject: () => {
-
-        }
+          });
+      },
+      reject: () => {},
     });
   }
 
@@ -91,10 +110,17 @@ export class DriversListTableComponent implements OnInit {
         header: headerText,
         data: {
           year: this.year,
-          model: driver
-        }
+          model: driver,
+        },
       }
     );
-    dialogRef.onClose.pipe(take(1), finalize(() => { this.refreshTrigger.next() })).subscribe();
+    dialogRef.onClose
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.refreshTrigger.next();
+        })
+      )
+      .subscribe();
   }
 }

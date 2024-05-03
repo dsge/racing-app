@@ -1,0 +1,74 @@
+<ng-container *ngIf="race$ && raceScoreScreenVotes$">
+    <div class="grid">
+        <div class="col-2">
+            <h2>Final Results</h2>
+            <ng-container *ngIf="(raceFinalResults$ | async)?.length; then finalResultsTable; else noFinalResultsYet"></ng-container>
+        </div>
+        <div class="col-10">
+            <h2>User Votes</h2>
+            <ng-container *ngIf="true; then userVotesTable"></ng-container>
+        </div>
+    </div>
+
+</ng-container>
+
+<ng-template #finalResultsTable>
+    <ng-container *ngIf="raceFinalResults$ | async as raceFinalResults">
+        <p-table [value]="raceFinalResults">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="max-width: 20px;">#</th>
+                    <th>Driver</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+                <tr>
+                    <td *ngIf="!row.is_fastest_lap_vote">{{ row.driver_final_position }}</td>
+                    <td *ngIf="row.is_fastest_lap_vote" title="Fastest Lap">LK</td>
+                    <td>{{ row.driver.full_name }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-container>
+</ng-template>
+
+<ng-template #userVotesTable>
+
+    <ng-container *ngIf="userVotesTableContents$ | async as userVotesTableContents">
+      <p-table [value]="userVotesTableContents.tableRows">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>&nbsp;</th>
+                <th *ngFor="let column of userVotesTableContents.tableColumns" class="text-center">{{ column.title }}</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td [attr.title]="row.user?.id ?? 'N/A'">{{ row.user?.display_name ?? 'N/A' }}</td>
+            <td
+                *ngFor="let vote of row.votes"
+                class="vote-cell"
+                [ngClass]="{
+                    'correct': vote?.correct ?? false,
+                    'incorrect': vote?.incorrect ?? false,
+                    'unknown': vote?.unknown ?? true
+                }"
+            >
+                {{ vote?.driver?.full_name ?? 'N/A' }}
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="userVotesTableContents.tableColumns.length + 1" class="text-center">No votes</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </ng-container>
+</ng-template>
+
+<ng-template #noFinalResultsYet>
+
+No final results yet
+
+</ng-template>

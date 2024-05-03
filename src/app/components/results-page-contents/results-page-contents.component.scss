@@ -1,0 +1,25 @@
+
+$redBg: #f87171;
+$redText: #450a0a;
+$orangeBg: #fb923c;
+$orangeText: #431407;
+$greenBg: #4ade80;
+$greenText: #052e16;
+$blueBg: #38bdf8;
+$blueText: #082f49;
+
+.vote-cell {
+  &.unknown {
+    background-color: transparent;
+  }
+  &:not(.unknown) {
+    &.correct {
+      background-color: $greenBg;
+      color: $greenText;
+    }
+    &.incorrect {
+      background-color: $redBg;
+      color: $redText;
+    }
+  }
+}

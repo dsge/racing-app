@@ -12,11 +12,11 @@ import { ToastService } from './services/toast.service';
   providers: [
     {
       provide: MessageService,
-      useExisting: ToastService
-    }
+      useExisting: ToastService,
+    },
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   public title: string = 'racing-app';

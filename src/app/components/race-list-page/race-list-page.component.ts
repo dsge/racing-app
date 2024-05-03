@@ -1,23 +1,31 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Race } from '../../models/race.model';
-import { BehaviorSubject, Observable, Subject, finalize, startWith, switchMap, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  finalize,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { UserService } from '../../services/user.service';
 import { RaceService } from '../../services/race.service';
 import { RaceEditModalComponent } from '../race-edit-modal/race-edit-modal.component';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { RaceListSectionComponent } from '../race-list-section/race-list-section.component';
 import { YearsService } from '../../services/years.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-race-list-page',
   standalone: true,
   imports: [CommonModule, ButtonModule, RaceListSectionComponent],
-  providers: [DialogService],
   templateUrl: './race-list-page.component.html',
   styleUrl: './race-list-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RaceListPageComponent {
   /**
@@ -40,10 +48,12 @@ export class RaceListPageComponent {
 
   protected userService: UserService = inject(UserService);
   protected raceService: RaceService = inject(RaceService);
-  protected dialogService: DialogService = inject(DialogService);
+  protected dialogService: ModalService = inject(ModalService);
   protected yearsService: YearsService = inject(YearsService);
   protected years?: number[];
-  protected refreshTrigger$: BehaviorSubject<null> = new BehaviorSubject<null>(null);
+  protected refreshTrigger$: BehaviorSubject<null> = new BehaviorSubject<null>(
+    null
+  );
 
   constructor() {
     this.ongoingRaceModels$ = this.refreshTrigger$.pipe(
@@ -109,10 +119,17 @@ export class RaceListPageComponent {
       {
         header: headerText,
         data: {
-          model: model
-        }
+          model: model,
+        },
       }
     );
-    dialogRef.onClose.pipe(take(1), finalize(() => { this.refreshTrigger$.next(null) })).subscribe();
+    dialogRef.onClose
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.refreshTrigger$.next(null);
+        })
+      )
+      .subscribe();
   }
 }

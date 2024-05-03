@@ -10,11 +10,8 @@ describe('RaceListPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RaceListPageComponent],
-      providers: [
-        provideMockSupabaseClient()
-      ]
-    })
-    .compileComponents();
+      providers: [provideMockSupabaseClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RaceListPageComponent);
     component = fixture.componentInstance;

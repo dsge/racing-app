@@ -1,1 +1,42 @@
-<p>race-results-page works!</p>
+<ng-container *ngIf="race$ | async as race; else notFound">
+  <div class="grid">
+    <div class="col-10">
+      <h1>
+        {{ race.race_name }}
+        <p-badge value="Sprint race" severity="danger" *ngIf="race.is_sprint_race"></p-badge>
+      </h1>
+      <div class="subtitle"> {{ race.race_start_date | date }} - {{ race.race_end_date | date }} </div>
+    </div>
+    <div class="col-2">
+      <p-button (click)="openEditFinalResultsDialog(race)" label="Edit Final Results" severity="primary" [disabled]="!currentUserIsModerator()"></p-button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col-12">
+      <ng-container *ngIf="hasVotingEnded(race); else votingNotEnded">
+
+        <ng-container *ngIf="{ raceScoreScreenVotes: raceScoreScreenVotes$ | async, loading: loading$ | async } as data">
+          <ng-container *ngIf="!data.loading; else loading">
+            <ng-container *ngIf="drivers$ | async as drivers">
+              <app-results-page-contents
+                [race$]="race$"
+                [raceScoreScreenVotes$]="raceScoreScreenVotes$"
+                [drivers]="drivers ?? []"
+              ></app-results-page-contents>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+      </ng-container>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #votingNotEnded>
+  Voting has not yet ended
+</ng-template>
+
+<ng-template #notFound>Not found</ng-template>
+
+<ng-template #loading>Loading</ng-template>

@@ -13,9 +13,7 @@ describe('RaceService', () => {
   beforeEach(() => {
     supabaseApiResponse$ = new ReplaySubject<Response>(1);
     TestBed.configureTestingModule({
-      providers: [
-        provideMockSupabaseClient(supabaseApiResponse$)
-      ]
+      providers: [provideMockSupabaseClient(supabaseApiResponse$)],
     });
     service = TestBed.inject(RaceService);
   });
@@ -25,10 +23,13 @@ describe('RaceService', () => {
   });
 
   it('should delete the race', (done: DoneFn) => {
-    service.deleteRace({ id: 5 } as Race).pipe(take(1)).subscribe((res: PostgrestSingleResponse<null>) => {
-      expect(res.data).toBeDefined();
-      done();
-    });
+    service
+      .deleteRace({ id: 5 } as Race)
+      .pipe(take(1))
+      .subscribe((res: PostgrestSingleResponse<null>) => {
+        expect(res.data).toBeDefined();
+        done();
+      });
     supabaseApiResponse$.next(new Response());
   });
 });

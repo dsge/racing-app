@@ -1,8 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { SelectItem } from 'primeng/api';
-import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
-import { take, tap, finalize, Observable, shareReplay, map, combineLatest, BehaviorSubject, switchMap } from 'rxjs';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import {
+  take,
+  tap,
+  finalize,
+  Observable,
+  shareReplay,
+  map,
+  combineLatest,
+  BehaviorSubject,
+  switchMap,
+} from 'rxjs';
 import { Race } from '../../models/race.model';
 import { ToastService } from '../../services/toast.service';
 import { YearsService } from '../../services/years.service';
@@ -13,6 +23,8 @@ import { Driver } from '../../models/driver.model';
 import { DriverService } from '../../services/driver.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { VoteEditFormComponent } from '../vote-edit-form/vote-edit-form.component';
+import { RaceService } from '../../services/race.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-vote-edit-modal',
@@ -20,7 +32,7 @@ import { VoteEditFormComponent } from '../vote-edit-form/vote-edit-form.componen
   imports: [CommonModule, ProgressSpinnerModule, VoteEditFormComponent],
   templateUrl: './vote-edit-modal.component.html',
   styleUrl: './vote-edit-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VoteEditModalComponent {
   public loadingCurrentUserVotes: boolean = true;
@@ -40,74 +52,135 @@ export class VoteEditModalComponent {
   public allDriverOptions$: Observable<SelectItem<Driver>[]>;
 
   protected data: {
-    race: Race,
+    race: Race;
+    editingFinalResults: boolean;
   };
   protected userVoteService: UserVoteService = inject(UserVoteService);
   protected dialogRef: DynamicDialogRef = inject(DynamicDialogRef);
   protected toastService: ToastService = inject(ToastService);
   protected yearsService: YearsService = inject(YearsService);
   protected driverService: DriverService = inject(DriverService);
-  protected newUserVotes$: BehaviorSubject<UserVote[]> = new BehaviorSubject<UserVote[]>([]);
+  protected raceService: RaceService = inject(RaceService);
+  protected newUserVotes$: BehaviorSubject<UserVote[]> = new BehaviorSubject<
+    UserVote[]
+  >([]);
 
-  constructor(dialogService: DialogService) {
-    this.data = {...(dialogService.getInstance(this.dialogRef).data)};
+  constructor(dialogService: ModalService) {
+    this.data = { ...dialogService.getInstance(this.dialogRef).data };
 
     this.userVotes$ = this.createUserVotes();
-    const possibleDrivers$: Observable<Driver[]> = this.driverService.getDriversForYear(this.data.race.drivers_from_year).pipe(
-      take(1),
-      tap(() => { this.loadingPossibleDrivers = false; }),
-      shareReplay(1)
+    const possibleDrivers$: Observable<Driver[]> = this.driverService
+      .getDriversForYear(this.data.race.drivers_from_year)
+      .pipe(
+        take(1),
+        tap(() => {
+          this.loadingPossibleDrivers = false;
+        }),
+        shareReplay(1)
+      );
+    this.filteredDriverOptions$ = this.createFilteredDriverOptions(
+      possibleDrivers$,
+      this.userVotes$
     );
-    this.filteredDriverOptions$ = this.createFilteredDriverOptions(possibleDrivers$, this.userVotes$);
     this.allDriverOptions$ = this.createAllDriverOptions(possibleDrivers$);
   }
 
+  public editingFinalResults(): boolean {
+    return !!this.data?.editingFinalResults;
+  }
+
   public onSubmit(): void {
-    this.userVotes$.pipe(
-      switchMap((userVotes: UserVote[]): Observable<PostgrestSingleResponse<unknown> | null> =>
-        this.userVoteService.setUserVotes(this.data.race!, userVotes)
-      ),
-      take(1),
-      tap(() => { this.saving = true; }),
-      finalize(() => { this.saving = false; })
-    ).subscribe((res: PostgrestSingleResponse<unknown> | null) => {
-      if (res?.error) {
-        this.toastService.add({
-          severity: 'error',
-          summary: 'Save failed',
-          detail: `Reason: ${res.error.message || 'Unknown'}`
-        });
-      } else {
-        this.dialogRef.close({ success: true })
-      }
-    })
+    this.userVotes$
+      .pipe(
+        switchMap(
+          (
+            userVotes: UserVote[]
+          ): Observable<PostgrestSingleResponse<unknown> | null> => {
+            if (this.editingFinalResults()) {
+              return this.raceService.setRaceFinalResults(
+                this.data.race!,
+                userVotes
+              );
+            } else {
+              return this.userVoteService.setUserVotes(
+                this.data.race!,
+                userVotes
+              );
+            }
+          }
+        ),
+        take(1),
+        tap(() => {
+          this.saving = true;
+        }),
+        finalize(() => {
+          this.saving = false;
+        })
+      )
+      .subscribe((res: PostgrestSingleResponse<unknown> | null) => {
+        if (res?.error) {
+          this.toastService.add({
+            severity: 'error',
+            summary: 'Save failed',
+            detail: `Reason: ${res.error.message || 'Unknown'}`,
+          });
+        } else {
+          this.dialogRef.close({ success: true });
+        }
+      });
   }
 
   public onNewVote(newVote: UserVote): void {
     let newUserVotes: UserVote[];
     if (newVote.is_fastest_lap_vote) {
-      newUserVotes = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.is_fastest_lap_vote !== true);
+      newUserVotes = this.newUserVotes$.value.filter(
+        (oldVote: UserVote) => oldVote.is_fastest_lap_vote !== true
+      );
     } else {
-      newUserVotes = this.newUserVotes$.value.filter((oldVote: UserVote) => oldVote.driver_final_position !== newVote.driver_final_position);
+      newUserVotes = this.newUserVotes$.value.filter(
+        (oldVote: UserVote) =>
+          oldVote.driver_final_position !== newVote.driver_final_position
+      );
     }
     newUserVotes.push(newVote);
     this.newUserVotes$.next(newUserVotes);
   }
 
   protected createUserVotes(): Observable<UserVote[]> {
+    let savedVotesToEdit$: Observable<UserVote[]>;
+    if (this.editingFinalResults()) {
+      savedVotesToEdit$ = this.raceService.getRaceFinalResults(this.data.race);
+    } else {
+      savedVotesToEdit$ = this.userVoteService.getUserVotes(this.data.race);
+    }
+
     return combineLatest([
-      this.userVoteService.getUserVotes(this.data.race).pipe(tap(() => { this.loadingCurrentUserVotes = false; })),
-      this.newUserVotes$
+      savedVotesToEdit$.pipe(
+        tap(() => {
+          this.loadingCurrentUserVotes = false;
+        })
+      ),
+      this.newUserVotes$,
     ]).pipe(
       map(([savedUserVotes, newUserVotes]: [UserVote[], UserVote[]]) => {
         const votesToDisplay: UserVote[] = [];
-        for (let driver_final_position: number = 1; driver_final_position <= 10; driver_final_position++) {
-          const vote: UserVote | undefined = this.findNormalVoteToDisplayByPosition(newUserVotes, savedUserVotes, driver_final_position);
+        for (
+          let driver_final_position: number = 1;
+          driver_final_position <= 10;
+          driver_final_position++
+        ) {
+          const vote: UserVote | undefined =
+            this.findNormalVoteToDisplayByPosition(
+              newUserVotes,
+              savedUserVotes,
+              driver_final_position
+            );
           if (vote) {
             votesToDisplay.push(vote);
           }
         }
-        const fastestLapVote: UserVote | undefined = this.findFastestLapVoteTiDisplay(newUserVotes, savedUserVotes);
+        const fastestLapVote: UserVote | undefined =
+          this.findFastestLapVoteTiDisplay(newUserVotes, savedUserVotes);
         if (fastestLapVote) {
           votesToDisplay.push(fastestLapVote);
         }
@@ -117,39 +190,67 @@ export class VoteEditModalComponent {
     );
   }
 
-  protected findNormalVoteToDisplayByPosition(newVotes: UserVote[], oldVotes: UserVote[], driver_final_position: number): UserVote | undefined {
+  protected findNormalVoteToDisplayByPosition(
+    newVotes: UserVote[],
+    oldVotes: UserVote[],
+    driver_final_position: number
+  ): UserVote | undefined {
     return (
-      newVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true) ||
-      oldVotes.find((vote: UserVote) => vote.driver_final_position === driver_final_position && vote.is_fastest_lap_vote != true)
+      newVotes.find(
+        (vote: UserVote) =>
+          vote.driver_final_position === driver_final_position &&
+          vote.is_fastest_lap_vote != true
+      ) ||
+      oldVotes.find(
+        (vote: UserVote) =>
+          vote.driver_final_position === driver_final_position &&
+          vote.is_fastest_lap_vote != true
+      )
     );
   }
 
-  protected findFastestLapVoteTiDisplay(newVotes: UserVote[], oldVotes: UserVote[]): UserVote | undefined {
+  protected findFastestLapVoteTiDisplay(
+    newVotes: UserVote[],
+    oldVotes: UserVote[]
+  ): UserVote | undefined {
     return (
       newVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true) ||
       oldVotes.find((vote: UserVote) => vote.is_fastest_lap_vote === true)
     );
   }
 
-  protected createFilteredDriverOptions(possibleDrivers$: Observable<Driver[]>, userVotes$: Observable<UserVote[]>): Observable<SelectItem<Driver>[]> {
+  protected createFilteredDriverOptions(
+    possibleDrivers$: Observable<Driver[]>,
+    userVotes$: Observable<UserVote[]>
+  ): Observable<SelectItem<Driver>[]> {
     return combineLatest([possibleDrivers$, userVotes$]).pipe(
-      map(([drivers, userVotes]: [Driver[], UserVote[]]) => drivers.map((driver: Driver) => ({
-            label: driver.full_name,
-            disabled: !!userVotes.find((userVote: UserVote) => userVote.driver.id === driver.id),
-            value: driver
-          } as SelectItem<Driver>)
+      map(([drivers, userVotes]: [Driver[], UserVote[]]) =>
+        drivers.map(
+          (driver: Driver) =>
+            ({
+              label: driver.full_name,
+              disabled: !!userVotes.find(
+                (userVote: UserVote) => userVote.driver.id === driver.id
+              ),
+              value: driver,
+            } as SelectItem<Driver>)
         )
       )
     );
   }
 
-  protected createAllDriverOptions(possibleDrivers$: Observable<Driver[]>): Observable<SelectItem<Driver>[]> {
+  protected createAllDriverOptions(
+    possibleDrivers$: Observable<Driver[]>
+  ): Observable<SelectItem<Driver>[]> {
     return possibleDrivers$.pipe(
-      map((drivers: Driver[]) => drivers.map((driver: Driver) => ({
-            label: driver.full_name,
-            disabled: false,
-            value: driver
-          } as SelectItem<Driver>)
+      map((drivers: Driver[]) =>
+        drivers.map(
+          (driver: Driver) =>
+            ({
+              label: driver.full_name,
+              disabled: false,
+              value: driver,
+            } as SelectItem<Driver>)
         )
       )
     );

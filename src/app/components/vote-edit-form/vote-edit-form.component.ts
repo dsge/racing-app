@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { UserVote } from '../../models/user-vote.model';
 import { Driver } from '../../models/driver.model';
 import { CommonModule } from '@angular/common';
@@ -13,7 +19,7 @@ import { VoteEditInputRowComponent } from '../vote-edit-input-row/vote-edit-inpu
   imports: [FormsModule, CommonModule, ButtonModule, VoteEditInputRowComponent],
   templateUrl: './vote-edit-form.component.html',
   styleUrl: './vote-edit-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VoteEditFormComponent {
   @Output() newVote: EventEmitter<UserVote> = new EventEmitter<UserVote>();
@@ -25,12 +31,16 @@ export class VoteEditFormComponent {
   @Input() is_sprint_race: boolean = false;
 
   public getDriverVotedForPosition(position: number): Driver | null {
-    const vote: UserVote | undefined = this.userVotes?.find((vote: UserVote) => vote.driver_final_position === position);
+    const vote: UserVote | undefined = this.userVotes?.find(
+      (vote: UserVote) => vote.driver_final_position === position
+    );
     return vote?.driver ?? null;
   }
 
   public getDriverVotedForFastestLap(): Driver | null {
-    const vote: UserVote | undefined = this.userVotes?.find((vote: UserVote) => vote.is_fastest_lap_vote === true);
+    const vote: UserVote | undefined = this.userVotes?.find(
+      (vote: UserVote) => vote.is_fastest_lap_vote === true
+    );
     return vote?.driver ?? null;
   }
 
@@ -38,7 +48,7 @@ export class VoteEditFormComponent {
     if (driver) {
       return this.emitNewVote({
         driver: driver,
-        driver_final_position: position
+        driver_final_position: position,
       });
     }
   }
@@ -47,7 +57,7 @@ export class VoteEditFormComponent {
     if (driver) {
       return this.emitNewVote({
         driver: driver,
-        is_fastest_lap_vote: true
+        is_fastest_lap_vote: true,
       });
     }
   }
@@ -57,8 +67,14 @@ export class VoteEditFormComponent {
    */
   public getPositions(): number[] {
     const maxPositions: number = this.is_sprint_race ? 8 : 10;
-    const numberOfPositions: number = (this.allDriverOptions ?? []).length < maxPositions ? (this.allDriverOptions ?? []).length: maxPositions;
-    return Array.from({length: numberOfPositions}, (_: unknown, i: number) => i + 1);
+    const numberOfPositions: number =
+      (this.allDriverOptions ?? []).length < maxPositions
+        ? (this.allDriverOptions ?? []).length
+        : maxPositions;
+    return Array.from(
+      { length: numberOfPositions },
+      (_: unknown, i: number) => i + 1
+    );
   }
 
   public onSubmitButtonClick(): void {
@@ -66,6 +82,6 @@ export class VoteEditFormComponent {
   }
 
   protected emitNewVote(newVote: UserVote): void {
-    this.newVote.emit(newVote)
+    this.newVote.emit(newVote);
   }
 }
