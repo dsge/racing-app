@@ -5,20 +5,16 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import {
-  Race,
-  RaceScoreScreenVote,
-  RaceScoreScreenVotes,
-} from '../../models/race.model';
+import { Race, RaceScoreScreenVotes } from '../../models/race.model';
 import { Observable, combineLatest, map } from 'rxjs';
 import { UserVote, UserVoteRecord } from '../../models/user-vote.model';
 import { Driver } from '../../models/driver.model';
 import { TableModule } from 'primeng/table';
+import { UserVotesTableContents } from '../../models/results-page.model';
 import {
-  UserVotesTableContents,
-  VoteTableColumn,
-  VoteTableRow,
-} from '../../models/results-page.model';
+  driverIdToDriver,
+  raceAndScooreScreenVotesToUserVotesTableContents,
+} from '../../utils/user-votes-table-contents.util';
 
 @Component({
   selector: 'app-results-page-contents',
@@ -70,39 +66,13 @@ export class ResultsPageContentsComponent implements OnInit {
     position: number | 'fastest-lap',
     rows: UserVoteRecord[]
   ): Driver | undefined {
-    return this.driverIdToDriver(
+    return driverIdToDriver(
       rows.find((row: UserVoteRecord) =>
         position !== 'fastest-lap'
           ? row.driver_final_position === position
           : row.is_fastest_lap_vote
-      )?.driver_id
-    );
-  }
-
-  public isCorrectVote(
-    position: number | 'fastest-lap',
-    driver: Driver | undefined,
-    raceFinalResults?: UserVote[] | null
-  ): boolean {
-    if (!driver || !raceFinalResults) {
-      return false;
-    }
-    return !!raceFinalResults.find(
-      (userVote: UserVote) =>
-        userVote.driver.id === driver.id &&
-        (position !== 'fastest-lap'
-          ? userVote.driver_final_position === position
-          : userVote.is_fastest_lap_vote)
-    );
-  }
-
-  /**
-   * returns a list of numbers starting from 1 up to `numberOfPositions`
-   */
-  protected calculatePositions(numberOfPositions: number): number[] {
-    return Array.from(
-      { length: numberOfPositions },
-      (_: unknown, i: number) => i + 1
+      )?.driver_id,
+      this.drivers
     );
   }
 
@@ -111,93 +81,14 @@ export class ResultsPageContentsComponent implements OnInit {
     raceScoreScreenVotes$: Observable<RaceScoreScreenVotes>
   ): Observable<UserVotesTableContents> {
     return combineLatest([race$, raceScoreScreenVotes$]).pipe(
-      map(([race, raceScoreScreenVotes]: [Race, RaceScoreScreenVotes]) => ({
-        race: race,
-        tableColumns: this.raceToTableColumns(race),
-        tableRows: this.getTableRows(
+      map(([race, raceScoreScreenVotes]: [Race, RaceScoreScreenVotes]) =>
+        raceAndScooreScreenVotesToUserVotesTableContents(
+          race,
           raceScoreScreenVotes,
-          this.raceToTableColumns(race)
-        ),
-      }))
+          this.drivers
+        )
+      )
     );
-  }
-
-  protected raceToTableColumns(race: Race): VoteTableColumn[] {
-    if (race.is_sprint_race) {
-      return this.calculatePositions(8).map((position: number) => ({
-        title: `${position}`,
-        driver_position_to_display: position,
-      }));
-    } else {
-      const ret: VoteTableColumn[] = this.calculatePositions(10).map(
-        (position: number) => ({
-          title: `${position}`,
-          driver_position_to_display: position,
-        })
-      );
-      ret.push({
-        title: 'Fastest Lap',
-        is_fastest_lap_column: true,
-      });
-      return ret;
-    }
-  }
-
-  protected getTableRows(
-    raceScoreScreenVotes: RaceScoreScreenVotes,
-    tableColumns: VoteTableColumn[]
-  ): VoteTableRow[] {
-    const finalResults: UserVote[] | undefined =
-      raceScoreScreenVotes.raceFinalResults;
-    const haveFinalResults: boolean = !!finalResults?.length;
-    return raceScoreScreenVotes.userVotes.map(
-      (rowData: RaceScoreScreenVote) => {
-        return {
-          user: rowData.user,
-          votes: tableColumns.map((tableColumn: VoteTableColumn) => {
-            const voteRecord: UserVoteRecord | undefined = rowData.votes.find(
-              (record: UserVoteRecord) => {
-                if (tableColumn.is_fastest_lap_column) {
-                  return record.is_fastest_lap_vote === true;
-                } else {
-                  return (
-                    record.driver_final_position ===
-                    tableColumn.driver_position_to_display
-                  );
-                }
-              }
-            );
-            if (!voteRecord) {
-              return null;
-            }
-            const driver: Driver | undefined = this.driverIdToDriver(
-              voteRecord.driver_id
-            );
-            const correct: boolean =
-              haveFinalResults &&
-              this.isCorrectVote(
-                voteRecord.driver_final_position ?? -2,
-                driver,
-                finalResults
-              );
-
-            return {
-              vote: voteRecord,
-              driver: driver,
-              correct: haveFinalResults && correct,
-              incorrect: haveFinalResults && !correct,
-              unknown: !haveFinalResults,
-            };
-          }),
-        };
-      }
-    );
-  }
-
-  protected driverIdToDriver(
-    driver_id: number | undefined
-  ): Driver | undefined {
-    return this.drivers.find((driver: Driver) => driver.id === driver_id);
   }
 
   protected sortByFinalPosition(a: UserVote, b: UserVote): number {

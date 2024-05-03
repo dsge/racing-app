@@ -33,13 +33,13 @@
 </ng-template>
 
 <ng-template #userVotesTable>
-
     <ng-container *ngIf="userVotesTableContents$ | async as userVotesTableContents">
       <p-table [value]="userVotesTableContents.tableRows">
         <ng-template pTemplate="header">
             <tr>
                 <th>&nbsp;</th>
                 <th *ngFor="let column of userVotesTableContents.tableColumns" class="text-center">{{ column.title }}</th>
+                <th *ngIf="raceFinalResults$ | async as raceFinalResults">Points</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-row>
@@ -55,6 +55,10 @@
                 }"
             >
                 {{ vote?.driver?.full_name ?? 'N/A' }}
+            </td>
+            <td *ngIf="raceFinalResults$ | async as raceFinalResults">
+              {{ row.finalPoints }}
+              <i class="pi pi-crown" *ngIf="row.highestPoints" title="Highest Points"></i>
             </td>
           </tr>
         </ng-template>
