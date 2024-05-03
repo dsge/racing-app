@@ -225,6 +225,7 @@ export class RaceService {
         .select('*', { count: 'exact', head: true })
         .eq('user_uuid', user.id)
         .eq('race_id', race.id)
+        .eq('is_final_result', false)
         .returns<null>()
     ).pipe(map((res: PostgrestSingleResponse<null>) => !!res.count));
   }
