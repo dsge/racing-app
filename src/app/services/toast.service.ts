@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 /**
  * A global singleton version of primeng's MessageService

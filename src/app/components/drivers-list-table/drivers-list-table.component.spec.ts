@@ -19,11 +19,8 @@ describe('DriversListTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DriversListTableComponent],
-      providers: [
-        provideMockSupabaseClient()
-      ]
-    })
-    .compileComponents();
+      providers: [provideMockSupabaseClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DriversListTableComponent);
     component = fixture.componentInstance;
@@ -41,28 +38,32 @@ describe('DriversListTableComponent', () => {
     it('should set loading to true while getDriversForYear is processing', () => {
       component.year = 5;
       const trigger$: Subject<Driver[]> = new Subject<Driver[]>();
-      driverService.getDriversForYear = jasmine.createSpy().and.returnValue(trigger$);
+      driverService.getDriversForYear = jasmine
+        .createSpy()
+        .and.returnValue(trigger$);
       fixture.detectChanges();
       expect(component.loading).toBeTrue();
       trigger$.next([]);
       trigger$.complete();
-    })
+    });
 
     it('should set loading to false after getDriversForYear is done', () => {
       component.year = 5;
       const trigger$: Subject<Driver[]> = new Subject<Driver[]>();
-      driverService.getDriversForYear = jasmine.createSpy().and.returnValue(trigger$);
+      driverService.getDriversForYear = jasmine
+        .createSpy()
+        .and.returnValue(trigger$);
       fixture.detectChanges();
       trigger$.next([]);
       expect(component.loading).toBeFalse();
       trigger$.complete();
-    })
+    });
   });
 
   describe('onNewDriverButtonClick', () => {
     it('should open a modal', () => {
       modalService.open = jasmine.createSpy().and.returnValue({
-        onClose: of(null)
+        onClose: of(null),
       });
       component.onNewDriverButtonClick();
       expect(modalService.open).toHaveBeenCalledTimes(1);
@@ -72,7 +73,7 @@ describe('DriversListTableComponent', () => {
   describe('onEditDriverClick', () => {
     it('should open a modal', () => {
       modalService.open = jasmine.createSpy().and.returnValue({
-        onClose: of(null)
+        onClose: of(null),
       });
       component.onEditDriverClick({} as Driver);
       expect(modalService.open).toHaveBeenCalledTimes(1);
@@ -82,27 +83,42 @@ describe('DriversListTableComponent', () => {
   describe('onDeleteDriverButtonClick', () => {
     it('should call confirmationService.confirm', () => {
       confirmationService.confirm = jasmine.createSpy();
-      component.onDeleteDriverButtonClick({ target: {} } as Event, {} as Driver);
+      component.onDeleteDriverButtonClick(
+        { target: {} } as Event,
+        {} as Driver
+      );
       expect(confirmationService.confirm).toHaveBeenCalledTimes(1);
     });
 
     it('should call deleteDriver', (done: DoneFn) => {
-      driverService.deleteDriver = jasmine.createSpy().and.returnValue(of(null));
-      confirmationService.confirm = jasmine.createSpy().and.callFake((confirmation: Confirmation) => {
-        confirmation.accept?.();
-        expect(driverService.deleteDriver).toHaveBeenCalledTimes(1);
-        done();
-      });
-      component.onDeleteDriverButtonClick({ target: {} } as Event, {} as Driver);
+      driverService.deleteDriver = jasmine
+        .createSpy()
+        .and.returnValue(of(null));
+      confirmationService.confirm = jasmine
+        .createSpy()
+        .and.callFake((confirmation: Confirmation) => {
+          confirmation.accept?.();
+          expect(driverService.deleteDriver).toHaveBeenCalledTimes(1);
+          done();
+        });
+      component.onDeleteDriverButtonClick(
+        { target: {} } as Event,
+        {} as Driver
+      );
     });
 
     it('should provide a callable reject function ', (done: DoneFn) => {
-      confirmationService.confirm = jasmine.createSpy().and.callFake((confirmation: Confirmation) => {
-        expect(confirmation.reject).toBeDefined();
-        confirmation.reject?.();
-        done();
-      });
-      component.onDeleteDriverButtonClick({ target: {} } as Event, {} as Driver);
+      confirmationService.confirm = jasmine
+        .createSpy()
+        .and.callFake((confirmation: Confirmation) => {
+          expect(confirmation.reject).toBeDefined();
+          confirmation.reject?.();
+          done();
+        });
+      component.onDeleteDriverButtonClick(
+        { target: {} } as Event,
+        {} as Driver
+      );
     });
   });
 });

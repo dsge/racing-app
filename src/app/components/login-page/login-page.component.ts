@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { AuthTokenResponsePassword } from '@supabase/supabase-js';
 import { finalize, take } from 'rxjs';
 import { CardModule } from 'primeng/card';
@@ -14,16 +19,16 @@ import { ToastService } from '../../services/toast.service';
   imports: [CardModule, FormsModule, ButtonModule],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
   public inputs: {
-    email: string,
-    password: string
+    email: string;
+    password: string;
   } = {
-      email: '',
-      password: ''
-    };
+    email: '',
+    password: '',
+  };
   public loading: boolean = false;
 
   protected userService: UserService = inject(UserService);
@@ -33,31 +38,34 @@ export class LoginPageComponent {
 
   public loginWithEmail(): void {
     this.loading = true;
-    this.userService.signInWithPassword({
-      email: this.inputs.email,
-      password: this.inputs.password,
-    }).pipe(
-      take(1),
-      finalize(() => {
-        this.loading = false;
-        this.changeDetector.markForCheck();
+    this.userService
+      .signInWithPassword({
+        email: this.inputs.email,
+        password: this.inputs.password,
       })
-    ).subscribe((result: AuthTokenResponsePassword) => {
-      if (!result.error) {
-        // successful login
-        this.router.navigate(['/races']);
-      } else {
-        // failed login
-        this.toastService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Login Failed'
-        });
-      }
-    })
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.loading = false;
+          this.changeDetector.markForCheck();
+        })
+      )
+      .subscribe((result: AuthTokenResponsePassword) => {
+        if (!result.error) {
+          // successful login
+          this.router.navigate(['/races']);
+        } else {
+          // failed login
+          this.toastService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Login Failed',
+          });
+        }
+      });
   }
 
   public signOut(): void {
-    this.userService.signOut().pipe(take(1)).subscribe()
+    this.userService.signOut().pipe(take(1)).subscribe();
   }
 }

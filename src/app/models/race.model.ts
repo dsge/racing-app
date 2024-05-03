@@ -18,29 +18,29 @@ export interface Race {
 }
 
 export interface VoteAndRaceRecordBase {
-  id?: number,
-  race_id?: number,
-  driver_id?: number,
-  driver_final_position?: number,
-  is_fastest_lap_vote?: boolean,
+  id?: number;
+  race_id?: number;
+  driver_id?: number;
+  driver_final_position?: number;
+  is_fastest_lap_vote?: boolean;
 }
 
 export interface RaceFinalResultRecord extends VoteAndRaceRecordBase {}
 
 export interface UserProfile {
-  id?: string,
-  display_name: string
+  id?: string;
+  display_name: string;
 }
 
 /**
  * Contains all the users and their votes, and also the final result of the race if we know it already
  */
 export interface RaceScoreScreenVotes {
-  raceFinalResults?: UserVote[],
-  userVotes: RaceScoreScreenVote[]
+  raceFinalResults?: UserVote[];
+  userVotes: RaceScoreScreenVote[];
 }
 
 export interface RaceScoreScreenVote {
-  user?: UserProfile,
-  votes: UserVoteRecord[]
+  user?: UserProfile;
+  votes: UserVoteRecord[];
 }

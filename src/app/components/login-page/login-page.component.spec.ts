@@ -17,11 +17,8 @@ describe('LoginPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoginPageComponent],
-      providers: [
-        provideMockSupabaseClient()
-      ]
-    })
-    .compileComponents();
+      providers: [provideMockSupabaseClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPageComponent);
     component = fixture.componentInstance;
@@ -37,17 +34,21 @@ describe('LoginPageComponent', () => {
 
   describe('loginWithEmail', () => {
     it('should navigate the user on successful login', () => {
-      userService.signInWithPassword = jasmine.createSpy().and.returnValue(of({}))
+      userService.signInWithPassword = jasmine
+        .createSpy()
+        .and.returnValue(of({}));
       router.navigate = jasmine.createSpy();
       component.loginWithEmail();
       expect(router.navigate).toHaveBeenCalled();
-    })
+    });
     it('should display a toast on failed login', () => {
-      userService.signInWithPassword = jasmine.createSpy().and.returnValue(of({ error: {} }))
+      userService.signInWithPassword = jasmine
+        .createSpy()
+        .and.returnValue(of({ error: {} }));
       toastService.add = jasmine.createSpy();
       component.loginWithEmail();
       expect(toastService.add).toHaveBeenCalled();
-    })
+    });
   });
 
   describe('signOut', () => {
@@ -55,6 +56,6 @@ describe('LoginPageComponent', () => {
       userService.signOut = jasmine.createSpy().and.returnValue(of(null));
       component.signOut();
       expect(userService.signOut).toHaveBeenCalledTimes(1);
-    })
+    });
   });
 });

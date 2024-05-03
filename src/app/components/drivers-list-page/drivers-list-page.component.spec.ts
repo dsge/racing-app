@@ -10,11 +10,8 @@ describe('DriversListPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DriversListPageComponent],
-      providers: [
-        provideMockSupabaseClient()
-      ]
-    })
-    .compileComponents();
+      providers: [provideMockSupabaseClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DriversListPageComponent);
     component = fixture.componentInstance;

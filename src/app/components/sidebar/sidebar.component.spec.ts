@@ -10,11 +10,8 @@ describe('SidebarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
-      providers: [
-        provideMockSupabaseClient()
-      ]
-    })
-    .compileComponents();
+      providers: [provideMockSupabaseClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SidebarComponent);
     component = fixture.componentInstance;

@@ -12,7 +12,7 @@ import { UserService } from '../../services/user.service';
   standalone: true,
   imports: [MenuModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
   public items$: Observable<MenuItem[]>;
@@ -27,20 +27,23 @@ export class SidebarComponent {
   protected createMenuItems(): Observable<MenuItem[]> {
     return this.userService.getUser().pipe(
       map((user: User | null) => !!user),
-      switchMap((isLoggedIn: boolean) => combineLatest([of(isLoggedIn), this.userService.isModerator()])),
+      switchMap((isLoggedIn: boolean) =>
+        combineLatest([of(isLoggedIn), this.userService.isModerator()])
+      ),
       map(([isLoggedIn, isModerator]: [boolean, boolean]) => {
         return [
           {
             label: 'Landing Page',
             routerLink: ['/'],
             routerLinkActiveOptions: { exact: true },
-            icon: PrimeIcons.HOME
-          },{
+            icon: PrimeIcons.HOME,
+          },
+          {
             label: 'Login Page',
             routerLink: ['/', 'login'],
             routerLinkActiveOptions: { exact: true },
             icon: PrimeIcons.SIGN_IN,
-            visible: !isLoggedIn
+            visible: !isLoggedIn,
           },
           {
             label: 'Races List Page',
@@ -48,7 +51,7 @@ export class SidebarComponent {
             routerLinkActiveOptions: { exact: true },
             visible: true,
             icon: PrimeIcons.CAR,
-            disabled: !isLoggedIn
+            disabled: !isLoggedIn,
           },
           {
             label: 'Drivers List Page',
@@ -56,7 +59,7 @@ export class SidebarComponent {
             routerLinkActiveOptions: { exact: true },
             icon: PrimeIcons.USERS,
             visible: true,
-            disabled: !isModerator
+            disabled: !isModerator,
           },
           {
             label: 'Logout',
@@ -64,16 +67,19 @@ export class SidebarComponent {
             command: () => {
               this.onLogoutPressed();
             },
-            visible: isLoggedIn
-          }
+            visible: isLoggedIn,
+          },
         ];
       })
     );
   }
 
   protected onLogoutPressed(): void {
-    this.userService.signOut().pipe(take(1)).subscribe(() => {
-      this.router.navigate(['/login']);
-    })
+    this.userService
+      .signOut()
+      .pipe(take(1))
+      .subscribe(() => {
+        this.router.navigate(['/login']);
+      });
   }
 }

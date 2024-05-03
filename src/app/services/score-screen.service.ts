@@ -17,7 +17,7 @@ export class ScoreScreenService {
    * Who voted for what, and what was the final result?
    */
   public getRaceScoreScreenVotes(race: Race): Observable<RaceScoreScreenVotes> {
-    from(this.supabaseClient
+    return from(this.supabaseClient
       .from('user_votes')
       .select()
       .eq('race_id', race.id)
@@ -26,11 +26,7 @@ export class ScoreScreenService {
       map((res: { data: UserVoteRecord[] | null }) => res.data ?? undefined),
       take(1),
       switchMap((records: UserVoteRecord[] | undefined) => this.userVoteRecordsToRaceScoreScreenVotes(race, records))
-    ).subscribe((res) => {
-      console.log('RESSS', res)
-    })
-
-    return of({} as RaceScoreScreenVotes);
+    )
   }
 
   protected userVoteRecordsToRaceScoreScreenVotes(race: Race, records?: UserVoteRecord[]): Observable<RaceScoreScreenVotes> {

@@ -3,7 +3,7 @@ import { getYearsListStartingFrom } from '../utils/years';
 import { getYear } from 'date-fns';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class YearsService {
   /**

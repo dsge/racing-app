@@ -8,9 +8,7 @@ describe('DriverService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideMockSupabaseClient()
-      ]
+      providers: [provideMockSupabaseClient()],
     });
     service = TestBed.inject(DriverService);
   });

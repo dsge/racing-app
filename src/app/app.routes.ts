@@ -10,27 +10,28 @@ import { RaceService } from './services/race.service';
 export const routes: Routes = [
   {
     path: '',
-    component: LandingPageComponent
+    component: LandingPageComponent,
   },
   {
     path: 'login',
-    component: LoginPageComponent
+    component: LoginPageComponent,
   },
   {
     path: 'races',
     component: RaceListPageComponent,
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'races/:raceId/results',
     component: RaceResultsPageComponent,
     pathMatch: 'full',
     resolve: {
-      race: (route: ActivatedRouteSnapshot) => inject(RaceService).getRaceById(route.paramMap.get('raceId')!)
-    }
+      race: (route: ActivatedRouteSnapshot) =>
+        inject(RaceService).getRaceById(route.paramMap.get('raceId')!),
+    },
   },
   {
     path: 'drivers',
-    component: DriversListPageComponent
-  }
+    component: DriversListPageComponent,
+  },
 ];

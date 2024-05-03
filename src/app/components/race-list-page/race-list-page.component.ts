@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Race } from '../../models/race.model';
-import { BehaviorSubject, Observable, Subject, finalize, startWith, switchMap, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  finalize,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { UserService } from '../../services/user.service';
 import { RaceService } from '../../services/race.service';
@@ -17,7 +25,7 @@ import { ModalService } from '../../services/modal.service';
   imports: [CommonModule, ButtonModule, RaceListSectionComponent],
   templateUrl: './race-list-page.component.html',
   styleUrl: './race-list-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RaceListPageComponent {
   /**
@@ -43,7 +51,9 @@ export class RaceListPageComponent {
   protected dialogService: ModalService = inject(ModalService);
   protected yearsService: YearsService = inject(YearsService);
   protected years?: number[];
-  protected refreshTrigger$: BehaviorSubject<null> = new BehaviorSubject<null>(null);
+  protected refreshTrigger$: BehaviorSubject<null> = new BehaviorSubject<null>(
+    null
+  );
 
   constructor() {
     this.ongoingRaceModels$ = this.refreshTrigger$.pipe(
@@ -109,10 +119,17 @@ export class RaceListPageComponent {
       {
         header: headerText,
         data: {
-          model: model
-        }
+          model: model,
+        },
       }
     );
-    dialogRef.onClose.pipe(take(1), finalize(() => { this.refreshTrigger$.next(null) })).subscribe();
+    dialogRef.onClose
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.refreshTrigger$.next(null);
+        })
+      )
+      .subscribe();
   }
 }
