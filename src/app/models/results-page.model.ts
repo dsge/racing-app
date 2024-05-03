@@ -31,6 +31,8 @@ export interface VoteData {
 export interface VoteTableRow {
   user?: UserProfile;
   votes: (VoteData | null)[];
+  finalPoints: number;
+  highestPoints?: boolean;
 }
 
 /**

@@ -6,6 +6,7 @@ import {
 } from '../models/race.model';
 import {
   UserVotesTableContents,
+  VoteData,
   VoteTableColumn,
   VoteTableRow,
 } from '../models/results-page.model';
@@ -75,48 +76,97 @@ const getTableRows: (
   tableColumns: VoteTableColumn[],
   drivers: Driver[]
 ): VoteTableRow[] => {
+  const ret: VoteTableRow[] = raceScoreScreenVotes.userVotes.map(
+    (rowData: RaceScoreScreenVote) => {
+      const votes: (VoteData | null)[] = userVotesToDisplay(
+        tableColumns,
+        rowData,
+        raceScoreScreenVotes,
+        drivers
+      );
+      return {
+        user: rowData.user,
+        votes: votes,
+        finalPoints: calculateFinalPoints(votes),
+      };
+    }
+  );
+  return addHighestPoints(ret);
+};
+
+const addHighestPoints: (rows: VoteTableRow[]) => VoteTableRow[] = (
+  rows: VoteTableRow[]
+): VoteTableRow[] => {
+  let highest: number = -1;
+  let highestIndex: number = 0;
+  rows.forEach((row: VoteTableRow, index: number) => {
+    if (row.finalPoints > highest) {
+      highest = row.finalPoints;
+      highestIndex = index;
+    }
+  });
+  if (highest >= 0) {
+    rows[highestIndex].highestPoints = true;
+  }
+  return rows;
+};
+
+const calculateFinalPoints: (votes: (VoteData | null)[]) => number = (
+  votes: (VoteData | null)[]
+): number => {
+  return votes.reduce((points: number, vote: VoteData | null) => {
+    return points + (vote?.correct ? 1 : 0);
+  }, 0);
+};
+
+const userVotesToDisplay: (
+  tableColumns: VoteTableColumn[],
+  rowData: RaceScoreScreenVote,
+  raceScoreScreenVotes: RaceScoreScreenVotes,
+  drivers: Driver[]
+) => (VoteData | null)[] = (
+  tableColumns: VoteTableColumn[],
+  rowData: RaceScoreScreenVote,
+  raceScoreScreenVotes: RaceScoreScreenVotes,
+  drivers: Driver[]
+): (VoteData | null)[] => {
   const finalResults: UserVote[] | undefined =
     raceScoreScreenVotes.raceFinalResults;
   const haveFinalResults: boolean = !!finalResults?.length;
-  return raceScoreScreenVotes.userVotes.map((rowData: RaceScoreScreenVote) => {
-    return {
-      user: rowData.user,
-      votes: tableColumns.map((tableColumn: VoteTableColumn) => {
-        const voteRecord: UserVoteRecord | undefined = rowData.votes.find(
-          (record: UserVoteRecord) => {
-            if (tableColumn.is_fastest_lap_column) {
-              return record.is_fastest_lap_vote === true;
-            } else {
-              return (
-                record.driver_final_position ===
-                tableColumn.driver_position_to_display
-              );
-            }
-          }
-        );
-        if (!voteRecord) {
-          return null;
-        }
-        const driver: Driver | undefined = driverIdToDriver(
-          voteRecord.driver_id,
-          drivers
-        );
-        const correct: boolean =
-          haveFinalResults &&
-          isCorrectVote(
-            voteRecord.driver_final_position ?? -2,
-            driver,
-            finalResults
+  return tableColumns.map((tableColumn: VoteTableColumn) => {
+    const voteRecord: UserVoteRecord | undefined = rowData.votes.find(
+      (record: UserVoteRecord) => {
+        if (tableColumn.is_fastest_lap_column) {
+          return record.is_fastest_lap_vote === true;
+        } else {
+          return (
+            record.driver_final_position ===
+            tableColumn.driver_position_to_display
           );
+        }
+      }
+    );
+    if (!voteRecord) {
+      return null;
+    }
+    const driver: Driver | undefined = driverIdToDriver(
+      voteRecord.driver_id,
+      drivers
+    );
+    const correct: boolean =
+      haveFinalResults &&
+      isCorrectVote(
+        voteRecord.driver_final_position ?? -2,
+        driver,
+        finalResults
+      );
 
-        return {
-          vote: voteRecord,
-          driver: driver,
-          correct: haveFinalResults && correct,
-          incorrect: haveFinalResults && !correct,
-          unknown: !haveFinalResults,
-        };
-      }),
+    return {
+      vote: voteRecord,
+      driver: driver,
+      correct: haveFinalResults && correct,
+      incorrect: haveFinalResults && !correct,
+      unknown: !haveFinalResults,
     };
   });
 };
