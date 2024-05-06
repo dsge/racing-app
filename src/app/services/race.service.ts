@@ -4,7 +4,7 @@ import { Race } from '../models/race.model';
 import { Observable, combineLatest, map, of, switchMap, take } from 'rxjs';
 import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
 import { UserService } from './user.service';
-import { UserVote, UserVoteRecord } from '../models/user-vote.model';
+import { UserVote } from '../models/user-vote.model';
 import { UserVoteService } from './user-vote.service';
 import { ApiService } from './api.service';
 

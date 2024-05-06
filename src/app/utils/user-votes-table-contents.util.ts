@@ -11,6 +11,7 @@ import {
   VoteTableRow,
 } from '../models/results-page.model';
 import { UserVote, UserVoteRecord } from '../models/user-vote.model';
+import { getNormalRacePoints, getSprintRacePoints } from './points.util';
 
 export const raceAndScooreScreenVotesToUserVotesTableContents: (
   race: Race,
@@ -21,14 +22,11 @@ export const raceAndScooreScreenVotesToUserVotesTableContents: (
   raceScoreScreenVotes: RaceScoreScreenVotes,
   drivers: Driver[]
 ): UserVotesTableContents => {
+  const tableColumns: VoteTableColumn[] = raceToTableColumns(race);
   return {
     race: race,
-    tableColumns: raceToTableColumns(race),
-    tableRows: getTableRows(
-      raceScoreScreenVotes,
-      raceToTableColumns(race),
-      drivers
-    ),
+    tableColumns: tableColumns,
+    tableRows: getTableRows(raceScoreScreenVotes, tableColumns, drivers, race),
   };
 };
 
@@ -70,11 +68,13 @@ const calculatePositions: (numberOfPositions: number) => number[] = (
 const getTableRows: (
   raceScoreScreenVotes: RaceScoreScreenVotes,
   tableColumns: VoteTableColumn[],
-  drivers: Driver[]
+  drivers: Driver[],
+  race: Race
 ) => VoteTableRow[] = (
   raceScoreScreenVotes: RaceScoreScreenVotes,
   tableColumns: VoteTableColumn[],
-  drivers: Driver[]
+  drivers: Driver[],
+  race: Race
 ): VoteTableRow[] => {
   const ret: VoteTableRow[] = raceScoreScreenVotes.userVotes.map(
     (rowData: RaceScoreScreenVote) => {
@@ -87,7 +87,7 @@ const getTableRows: (
       return {
         user: rowData.user,
         votes: votes,
-        finalPoints: calculateFinalPoints(votes),
+        finalPoints: calculateFinalPoints(votes, race),
       };
     }
   );
@@ -111,11 +111,27 @@ const addHighestPoints: (rows: VoteTableRow[]) => VoteTableRow[] = (
   return rows;
 };
 
-const calculateFinalPoints: (votes: (VoteData | null)[]) => number = (
-  votes: (VoteData | null)[]
-): number => {
+const calculateFinalPoints: (
+  votes: (VoteData | null)[],
+  race: Race
+) => number = (votes: (VoteData | null)[], race: Race): number => {
+  const pointTable:
+    | Record<number | 'fastest-lap', number>
+    | Record<number, number> = race.is_sprint_race
+    ? getSprintRacePoints()
+    : getNormalRacePoints();
   return votes.reduce((points: number, vote: VoteData | null) => {
-    return points + (vote?.correct ? 1 : 0);
+    let pointForCorrectVote: number = 0;
+    if (vote) {
+      if (!vote.vote.is_fastest_lap_vote && vote.vote.driver_final_position) {
+        pointForCorrectVote = pointTable[vote.vote.driver_final_position];
+      } else {
+        pointForCorrectVote = (
+          pointTable as Record<number | 'fastest-lap', number>
+        )['fastest-lap'];
+      }
+    }
+    return points + (vote?.correct ? pointForCorrectVote : 0);
   }, 0);
 };
 
@@ -156,7 +172,9 @@ const userVotesToDisplay: (
     const correct: boolean =
       haveFinalResults &&
       isCorrectVote(
-        voteRecord.driver_final_position ?? -2,
+        voteRecord.is_fastest_lap_vote
+          ? 'fastest-lap'
+          : voteRecord.driver_final_position ?? -2,
         driver,
         finalResults
       );
