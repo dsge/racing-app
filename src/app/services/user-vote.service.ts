@@ -1,32 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { Race } from '../models/race.model';
-import {
-  Observable,
-  combineLatest,
-  from,
-  map,
-  of,
-  switchMap,
-  take,
-} from 'rxjs';
-import {
-  PostgrestSingleResponse,
-  SupabaseClient,
-  User,
-} from '@supabase/supabase-js';
+import { Observable, combineLatest, map, of, switchMap, take } from 'rxjs';
+import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
 import { UserVote, UserVoteRecord } from '../models/user-vote.model';
 import { UserService } from './user.service';
 import { DriverService } from './driver.service';
 import { Driver } from '../models/driver.model';
-import { SUPABASE_CLIENT } from '../tokens/supabase-client';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserVoteService {
-  protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userService: UserService = inject(UserService);
   protected driverService: DriverService = inject(DriverService);
+  protected apiService: ApiService = inject(ApiService);
 
   public getUserVotes(
     race: Race,
@@ -40,24 +28,9 @@ export class UserVoteService {
         }
         let observable$: Observable<PostgrestSingleResponse<UserVoteRecord[]>>;
         if (is_final_result) {
-          observable$ = from(
-            this.supabaseClient
-              .from('user_votes')
-              .select('*')
-              .eq('is_final_result', true)
-              .eq('race_id', race.id)
-              .returns<UserVoteRecord[]>()
-          );
+          observable$ = this.apiService.getFinalResultsForRace(race);
         } else {
-          observable$ = from(
-            this.supabaseClient
-              .from('user_votes')
-              .select('*')
-              .eq('user_uuid', user.id)
-              .eq('is_final_result', false)
-              .eq('race_id', race.id)
-              .returns<UserVoteRecord[]>()
-          );
+          observable$ = this.apiService.getUserVotesForRace(race, user);
         }
 
         return observable$.pipe(
@@ -85,14 +58,7 @@ export class UserVoteService {
         }
         return this.removePreviousVotes(race, user, is_final_result).pipe(
           switchMap(() =>
-            from(
-              this.supabaseClient
-                .from('user_votes')
-                .insert(
-                  this.raceAndVotesToRecords(race, votes, user, is_final_result)
-                )
-                .returns()
-            )
+            this.insertNewVotes(race, user, votes, is_final_result)
           )
         );
       })
@@ -110,28 +76,34 @@ export class UserVoteService {
     return this.getUserVotes(model, true);
   }
 
+  protected insertNewVotes(
+    race: Race,
+    user: User,
+    votes: UserVote[],
+    is_final_result: boolean = false
+  ): Observable<PostgrestSingleResponse<unknown>> {
+    const records: UserVoteRecord[] = this.raceAndVotesToRecords(
+      race,
+      votes,
+      user,
+      is_final_result
+    );
+    if (is_final_result) {
+      return this.apiService.insertFinalResultsForRace(race, records);
+    } else {
+      return this.apiService.insertUserVotesForRace(race, records);
+    }
+  }
+
   protected removePreviousVotes(
     race: Race,
     user: User,
     is_final_result: boolean = false
   ): Observable<PostgrestSingleResponse<unknown>> {
     if (is_final_result) {
-      return from(
-        this.supabaseClient
-          .from('user_votes')
-          .delete()
-          .eq('race_id', race.id)
-          .eq('is_final_result', true)
-      );
+      return this.apiService.deleteFinalResultsFromRace(race);
     } else {
-      return from(
-        this.supabaseClient
-          .from('user_votes')
-          .delete()
-          .eq('user_uuid', user.id)
-          .eq('race_id', race.id)
-          .eq('is_final_result', false)
-      );
+      return this.apiService.deleteUserVotesFromRace(race, user);
     }
   }
 

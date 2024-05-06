@@ -9,35 +9,33 @@ const createFakeFetch =
     return firstValueFrom(supabaseApiResponse$);
   };
 
+const mockSupabaseFactory = (supabaseApiResponse$?: Observable<Response>) => {
+  const originalWarn: typeof console.warn = console.warn;
+  console.warn = () => {};
+  const client: SupabaseClient = createClient('http://fake-url/', 'fake-key', {
+    auth: {
+      autoRefreshToken: false,
+      storageKey: undefined,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      fetch: supabaseApiResponse$
+        ? createFakeFetch(supabaseApiResponse$)
+        : undefined,
+    },
+  });
+  console.warn = originalWarn;
+  return client;
+};
+
 export const provideMockSupabaseClient: (
   supabaseApiResponse$?: Observable<Response>
 ) => Provider[] = (supabaseApiResponse$?: Observable<Response>): Provider[] => {
   return [
     {
       provide: SUPABASE_CLIENT,
-      useFactory: () => {
-        const originalWarn: typeof console.warn = console.warn;
-        console.warn = () => {};
-        const client: SupabaseClient = createClient(
-          'http://fake-url/',
-          'fake-key',
-          {
-            auth: {
-              autoRefreshToken: false,
-              storageKey: undefined,
-              persistSession: false,
-              detectSessionInUrl: false,
-            },
-            global: {
-              fetch: supabaseApiResponse$
-                ? createFakeFetch(supabaseApiResponse$)
-                : undefined,
-            },
-          }
-        );
-        console.warn = originalWarn;
-        return client;
-      },
+      useFactory: () => mockSupabaseFactory(supabaseApiResponse$),
     },
   ];
 };

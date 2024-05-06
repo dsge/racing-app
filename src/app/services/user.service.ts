@@ -9,16 +9,9 @@ import {
   SupabaseClient,
   User,
 } from '@supabase/supabase-js';
-import {
-  Observable,
-  from,
-  map,
-  Subscriber,
-  switchMap,
-  of,
-  shareReplay,
-} from 'rxjs';
+import { Observable, map, Subscriber, switchMap, of, shareReplay } from 'rxjs';
 import { SupabaseAuthStateChangeEvent } from '../models/user.model';
+import { ApiService } from './api.service';
 import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 
 @Injectable({
@@ -27,6 +20,7 @@ import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 export class UserService {
   protected readonly supabaseAuthStateChange$: Observable<SupabaseAuthStateChangeEvent>;
   protected readonly isModerator$: Observable<boolean>;
+  protected readonly apiService: ApiService = inject(ApiService);
   protected readonly supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
 
   constructor() {
@@ -37,7 +31,7 @@ export class UserService {
   public signInWithPassword(
     credentials: SignInWithPasswordCredentials
   ): Observable<AuthTokenResponsePassword> {
-    return from(this.supabaseClient.auth.signInWithPassword(credentials));
+    return this.apiService.signInWithPassword(credentials);
   }
 
   /**
@@ -56,7 +50,7 @@ export class UserService {
   }
 
   public signOut(): Observable<{ error: AuthError | null }> {
-    return from(this.supabaseClient.auth.signOut());
+    return this.apiService.signOut();
   }
 
   protected createIsModeratorObservable(): Observable<boolean> {
@@ -65,18 +59,14 @@ export class UserService {
         if (!user) {
           return of(false);
         }
-        return from(
-          this.supabaseClient
-            .from('user_profiles')
-            .select('id, is_moderator')
-            .match({ is_moderator: true, id: user.id })
-            .returns<{ is_moderator: boolean }[]>()
-        ).pipe(
-          map(
-            (res: { data: { is_moderator: boolean }[] | null }) =>
-              res.data?.[0]?.is_moderator ?? false
-          )
-        );
+        return this.apiService
+          .isModerator(user)
+          .pipe(
+            map(
+              (res: { data: { is_moderator: boolean }[] | null }) =>
+                res.data?.[0]?.is_moderator ?? false
+            )
+          );
       }),
       shareReplay(1)
     );

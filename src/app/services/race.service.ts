@@ -1,34 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { format, formatISO, isBefore, parseISO, sub } from 'date-fns';
 import { Race } from '../models/race.model';
-import {
-  Observable,
-  combineLatest,
-  from,
-  map,
-  of,
-  switchMap,
-  take,
-} from 'rxjs';
-import {
-  PostgrestSingleResponse,
-  SupabaseClient,
-  User,
-} from '@supabase/supabase-js';
+import { Observable, combineLatest, map, of, switchMap, take } from 'rxjs';
+import { PostgrestSingleResponse, User } from '@supabase/supabase-js';
 import { UserService } from './user.service';
-import { YearsService } from './years.service';
-import { SUPABASE_CLIENT } from '../tokens/supabase-client';
-import { UserVote } from '../models/user-vote.model';
+import { UserVote, UserVoteRecord } from '../models/user-vote.model';
 import { UserVoteService } from './user-vote.service';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RaceService {
-  protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userService: UserService = inject(UserService);
-  protected yearsService: YearsService = inject(YearsService);
   protected userVoteService: UserVoteService = inject(UserVoteService);
+  protected apiService: ApiService = inject(ApiService);
 
   public hasUserVoted(race: Race): Observable<boolean> {
     return of(race.current_user_has_voted ?? false);
@@ -51,34 +37,21 @@ export class RaceService {
   }
 
   public createRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(
-      this.supabaseClient
-        .from('races')
-        .insert(this.stringifyRaceFieldsIfNeeded(model))
-    );
+    return this.apiService.createRace(this.stringifyRaceFieldsIfNeeded(model));
   }
 
   public updateRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(
-      this.supabaseClient
-        .from('races')
-        .update(this.stringifyRaceFieldsIfNeeded(model))
-        .eq('id', model.id)
-    );
+    return this.apiService.updateRace(this.stringifyRaceFieldsIfNeeded(model));
   }
 
   public deleteRace(model: Race): Observable<PostgrestSingleResponse<null>> {
-    return from(this.supabaseClient.from('races').delete().eq('id', model.id));
+    return this.apiService.createRace(model);
   }
 
   public getRaceById(id: number | string): Observable<Race | undefined> {
-    return from(
-      this.supabaseClient
-        .from('races')
-        .select()
-        .match({ id: id })
-        .returns<Race[]>()
-    ).pipe(map((res: { data: Race[] | null }) => res.data?.[0] ?? undefined));
+    return this.apiService
+      .getRaceById(id)
+      .pipe(map((res: { data: Race[] | null }) => res.data?.[0] ?? undefined));
   }
 
   public setRaceFinalResults(
@@ -93,78 +66,34 @@ export class RaceService {
   }
 
   public getOngoingRaces(now: Date = new Date()): Observable<Race[]> {
-    const todaysDate: string = format(now, 'yyyy-MM-dd');
     return this.addCurrentUserHasVotedField(
-      from(
-        this.supabaseClient
-          .from('races')
-          .select()
-          .lte('race_start_date', todaysDate)
-          .gte('race_end_date', todaysDate)
-          .order('race_end_date', { ascending: true })
-          .returns<Race[]>()
-      ).pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []))
+      this.apiService
+        .getOngoingRaces(now)
+        .pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []))
     );
   }
 
   public getUpcomingRaces(now: Date = new Date()): Observable<Race[]> {
-    const todaysDate: string = format(now, 'yyyy-MM-dd');
     return this.addCurrentUserHasVotedField(
-      from(
-        this.supabaseClient
-          .from('races')
-          .select()
-          .gt('race_start_date', todaysDate)
-          .order('race_end_date', { ascending: true })
-          .returns<Race[]>()
-      ).pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []))
+      this.apiService
+        .getUpcomingRaces(now)
+        .pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []))
     );
   }
 
   public getRecentRaces(now: Date = new Date()): Observable<Race[]> {
-    const todaysDate: string = format(now, 'yyyy-MM-dd');
-    const pastOneMonthDate: string = format(
-      sub(now, { months: 1 }),
-      'yyyy-MM-dd'
-    );
-    return from(
-      this.supabaseClient
-        .from('races')
-        .select()
-        .gt('race_end_date', pastOneMonthDate)
-        .lt('race_end_date', todaysDate)
-        .order('race_end_date', { ascending: true })
-        .returns<Race[]>()
-    ).pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []));
+    return this.apiService
+      .getRecentRaces(now)
+      .pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []));
   }
 
   public getRacesByYear(
     year: number,
     now: Date = new Date()
   ): Observable<Race[]> {
-    const currentYear: number = this.yearsService.getCurrentYear(now);
-    const pastOneMonthDate: string = format(
-      sub(now, { months: 1 }),
-      'yyyy-MM-dd'
-    );
-    const startOfYear: string = `${year}-01-01`;
-    const endOfYear: string = `${year}-12-31`;
-    let endDate: string;
-    if (year === currentYear) {
-      endDate = pastOneMonthDate;
-    } else {
-      endDate = endOfYear;
-    }
-
-    return from(
-      this.supabaseClient
-        .from('races')
-        .select()
-        .gte('race_end_date', startOfYear)
-        .lte('race_end_date', endDate)
-        .order('race_end_date', { ascending: true })
-        .returns<Race[]>()
-    ).pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []));
+    return this.apiService
+      .getRacesByYear(year, now)
+      .pipe(map((res: PostgrestSingleResponse<Race[]>) => res.data ?? []));
   }
 
   protected addCurrentUserHasVotedField(
@@ -219,14 +148,10 @@ export class RaceService {
   }
 
   protected getUserHasVoted(race: Race, user: User): Observable<boolean> {
-    return from(
-      this.supabaseClient
-        .from('user_votes')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_uuid', user.id)
-        .eq('race_id', race.id)
-        .eq('is_final_result', false)
-        .returns<null>()
-    ).pipe(map((res: PostgrestSingleResponse<null>) => !!res.count));
+    return this.apiService
+      .getUserHasVoted(race, user)
+      .pipe(
+        map((res: PostgrestSingleResponse<UserVoteRecord[]>) => !!res.count)
+      );
   }
 }

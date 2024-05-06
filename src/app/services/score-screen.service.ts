@@ -1,6 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_CLIENT } from '../tokens/supabase-client';
 import { UserVoteService } from './user-vote.service';
 import {
   Race,
@@ -9,35 +7,21 @@ import {
   UserProfile,
 } from '../models/race.model';
 import { UserVote, UserVoteRecord } from '../models/user-vote.model';
-import {
-  Observable,
-  combineLatest,
-  from,
-  map,
-  of,
-  switchMap,
-  take,
-} from 'rxjs';
+import { Observable, combineLatest, map, of, switchMap, take } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScoreScreenService {
-  protected supabaseClient: SupabaseClient = inject(SUPABASE_CLIENT);
   protected userVoteService: UserVoteService = inject(UserVoteService);
+  protected apiService: ApiService = inject(ApiService);
 
   /**
    * Who voted for what, and what was the final result?
    */
   public getRaceScoreScreenVotes(race: Race): Observable<RaceScoreScreenVotes> {
-    return from(
-      this.supabaseClient
-        .from('user_votes')
-        .select()
-        .eq('race_id', race.id)
-        .eq('is_final_result', false)
-        .returns<UserVoteRecord[]>()
-    ).pipe(
+    return this.apiService.getRaceScoreScreenVotes(race).pipe(
       map((res: { data: UserVoteRecord[] | null }) => res.data ?? undefined),
       take(1),
       switchMap((records: UserVoteRecord[] | undefined) =>
@@ -98,14 +82,10 @@ export class ScoreScreenService {
   protected userIdToUserProfile(
     userId: string
   ): Observable<UserProfile | undefined> {
-    return from(
-      this.supabaseClient
-        .from('user_profiles')
-        .select()
-        .eq('id', userId)
-        .returns<UserProfile[]>()
-    ).pipe(
-      map((res: { data: UserProfile[] | null }) => res.data?.[0] ?? undefined)
-    );
+    return this.apiService
+      .userIdToUserProfile(userId)
+      .pipe(
+        map((res: { data: UserProfile[] | null }) => res.data?.[0] ?? undefined)
+      );
   }
 }
