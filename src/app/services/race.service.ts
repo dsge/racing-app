@@ -150,8 +150,6 @@ export class RaceService {
   protected getUserHasVoted(race: Race, user: User): Observable<boolean> {
     return this.apiService
       .getUserHasVoted(race, user)
-      .pipe(
-        map((res: PostgrestSingleResponse<UserVoteRecord[]>) => !!res.count)
-      );
+      .pipe(map((res: PostgrestSingleResponse<unknown>) => !!res.count));
   }
 }
