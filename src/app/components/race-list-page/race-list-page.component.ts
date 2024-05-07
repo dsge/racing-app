@@ -113,13 +113,13 @@ export class RaceListPageComponent {
     this.openDialog('Add new Race');
   }
 
-  protected openDialog(headerText: string = '', model?: Race): void {
+  protected openDialog(headerText: string): void {
     const dialogRef: DynamicDialogRef = this.dialogService.open(
       RaceEditModalComponent,
       {
         header: headerText,
         data: {
-          model: model,
+          model: undefined,
         },
       }
     );

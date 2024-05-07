@@ -48,8 +48,8 @@ export class RaceListItemComponent {
     return this.raceService.getVotingEndTime(race);
   }
 
-  public formatDistance(date: Date): string {
-    return formatDistance(date, new Date(), {
+  public formatDistance(date: Date, now: Date = new Date()): string {
+    return formatDistance(date, now, {
       addSuffix: true,
     });
   }
@@ -66,7 +66,7 @@ export class RaceListItemComponent {
     this.openUserVoteEditDialog('Edit Votes', model);
   }
 
-  protected openRaceEditDialog(headerText: string = '', model?: Race): void {
+  protected openRaceEditDialog(headerText: string, model: Race): void {
     const dialogRef: DynamicDialogRef = this.dialogService.open(
       RaceEditModalComponent,
       {
@@ -80,16 +80,13 @@ export class RaceListItemComponent {
       .pipe(
         take(1),
         finalize(() => {
-          this.modelEdit.emit(model ?? null);
+          this.modelEdit.emit(model);
         })
       )
       .subscribe();
   }
 
-  protected openUserVoteEditDialog(
-    headerText: string = '',
-    model?: Race
-  ): void {
+  protected openUserVoteEditDialog(headerText: string, model: Race): void {
     const dialogRef: DynamicDialogRef = this.dialogService.open(
       VoteEditModalComponent,
       {
@@ -103,7 +100,7 @@ export class RaceListItemComponent {
       .pipe(
         take(1),
         finalize(() => {
-          this.modelEdit.emit(model ?? null);
+          this.modelEdit.emit(model);
         })
       )
       .subscribe();

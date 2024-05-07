@@ -17,10 +17,11 @@ import { DropdownModule } from 'primeng/dropdown';
 import { YearsService } from '../../services/years.service';
 import { SelectItem } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
 import { ModalService } from '../../services/modal.service';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @Component({
   selector: 'app-race-edit-modal',
@@ -75,8 +76,9 @@ export class RaceEditModalComponent implements OnInit {
 
   public getTimeField(fieldName: string | undefined): string | null {
     if (fieldName && this.data.model?.[fieldName as keyof Race]) {
-      return format(
+      return formatInTimeZone(
         parseISO(this.data.model[fieldName as keyof Race] as string),
+        'Europe/Budapest',
         'yyyy-MM-dd HH:mm'
       );
     }
